@@ -1,0 +1,290 @@
+[
+ {
+  "slug": "smeraldo",
+  "title": "Pistachio Pesto",
+  "heroTitleHtml": "Pistachio <br>Pesto",
+  "category": "salati",
+  "categoryName": "Savoury",
+  "themeColor": "#E6FFC7",
+  "descriptionHtml": "<p>Enveloping pesto. Ideal for traditional pasta dishes, warm bruschetta, or as an accompaniment to aged cheeses.</p><p>Ingredients: <strong>pistachios (65%)</strong>, sunflower seed oil, salt. Origin of Pistachio: EU</p>",
+  "allergensHtml": "<p><strong>pistachios</strong></p>",
+  "tips": "Perfect for pairing with pasta dishes, focaccia, pizza, and bruschetta. Delicious when paired with mortadella or crispy guanciale!\nKeep away from direct sunlight. Once opened, keep refrigerated and consume within 3–4 days.",
+  "conservation": "36 months",
+  "weightLabel": "Available weights",
+  "weights": [
+   "190g",
+   "1kg",
+   "3kg"
+  ],
+  "jarImage": "/sites/agrumea/smeraldo-jar.png",
+  "labelImage": "/sites/agrumea/smeraldo-label.jpg",
+  "previewImage": "/sites/agrumea/smeraldo-preview.png",
+  "gallery": [
+   "/sites/agrumea/smeraldo-g0.jpg",
+   "/sites/agrumea/smeraldo-g1.jpg",
+   "/sites/agrumea/smeraldo-g2.jpg"
+  ],
+  "fruitSvg": "/sites/agrumea/smeraldo-fruit.svg",
+  "seoTitle": "Smeraldo - Pistachio Pesto | Agrumea Farm",
+  "seoDescription": "Agrumea Farm pistachio pesto, rich and enveloping, made with 65% pistachio. Ideal for pasta dishes, warm bruschetta and aged cheeses."
+ },
+ {
+  "slug": "marmellata_arancia",
+  "title": "Orange Marmalade",
+  "heroTitleHtml": "Orange Marmalade",
+  "category": "marmellate",
+  "categoryName": "Marmelade and Jams",
+  "themeColor": "#FFE9D7",
+  "descriptionHtml": "<p>Fresh and citrusy, perfectly balancing sweet and bitter notes. Vibrant aromas meet a smooth, velvety texture. Ingredients: Orange (sliced pulp and peel)*, sugar*, lemon juice*, gelling agent: pectin.</p><p>*organic</p>",
+  "allergensHtml": "",
+  "tips": "Fresh and citrusy, perfectly balancing sweet and bitter notes. Vibrant aromas meet a smooth, velvety texture.",
+  "conservation": "36 months",
+  "weightLabel": "Available weights",
+  "weights": [
+   "240 g",
+   "1.2 kg"
+  ],
+  "jarImage": "/sites/agrumea/marmellata_arancia-jar.png",
+  "labelImage": "/sites/agrumea/marmellata_arancia-label.jpg",
+  "previewImage": "/sites/agrumea/marmellata_arancia-preview.png",
+  "gallery": [
+   "/sites/agrumea/marmellata_arancia-g0.jpg",
+   "/sites/agrumea/marmellata_arancia-g1.jpg",
+   "/sites/agrumea/marmellata_arancia-g2.jpg"
+  ],
+  "fruitSvg": "/sites/agrumea/marmellata_arancia-fruit.svg",
+  "seoTitle": "Organic Sliced Orange Marmalade | Agrumea Farm",
+  "seoDescription": "Agrumea organic sliced orange marmalade: fresh, citrusy and velvety, made with Sicilian orange pulp and peel."
+ },
+ {
+  "slug": "caponata",
+  "title": "Sicilian Caponata",
+  "heroTitleHtml": "Sicilian <br>Caponata",
+  "category": "salati",
+  "categoryName": "Savoury",
+  "themeColor": "#F0CFE5",
+  "descriptionHtml": "<p>Rich in notes and flavors, like Baroque music: sweet and sour, and irresistible!</p><p>Ingredients: bell peppers, eggplant, <strong>celery,</strong> sunflower oil, onion, carrots, green olives (olives, salt, antioxidant: ascorbic acid, acidity regulator: citric acid), sugar, capers (capers, salt), white wine vinegar <strong>(contains sulfites)</strong>, sun-dried tomato (tomato, salt), black pepper.</p>",
+  "allergensHtml": "<p>May contain: gluten, tree nuts, mustard, sesame, soy</p>",
+  "tips": "Perfect to open a meal or to elevate a sun-drenched buffet. Serve it over slices of rustic homemade bread, or pair it with traditional Sicilian cheeses like Ragusano DOP, matured Sicilian Pecorino, or savory ricotta salata. It also makes an exquisite accompaniment to grilled meats or fresh catch of the day. Keep away from heat sources and direct sunlight. After opening, store in the refrigerator and consume within 3-4 days.",
+  "conservation": "36 months",
+  "weightLabel": "Available weights",
+  "weights": [
+   "190g",
+   "1kg",
+   "3kg"
+  ],
+  "jarImage": "/sites/agrumea/caponata-jar.png",
+  "labelImage": "/sites/agrumea/caponata-label.jpg",
+  "previewImage": "/sites/agrumea/caponata-preview.png",
+  "gallery": [
+   "/sites/agrumea/caponata-g0.jpg",
+   "/sites/agrumea/caponata-g1.jpg",
+   "/sites/agrumea/caponata-g2.jpg"
+  ],
+  "fruitSvg": "/sites/agrumea/caponata-fruit.svg",
+  "seoTitle": "Baroque Symphony Sicilian Caponata | Agrumea Farm",
+  "seoDescription": "Agrumea Farm Baroque Symphony: sweet and sour Sicilian caponata with peppers, aubergines, olives, capers and sun-dried tomato."
+ },
+ {
+  "slug": "pestorosso",
+  "title": "Iblean Red Pesto",
+  "heroTitleHtml": "Iblean<br>Red Pesto",
+  "category": "salati",
+  "categoryName": "Savoury",
+  "themeColor": "#F8C8D0",
+  "descriptionHtml": "<p>All the warmth of Sicily in a rich, enveloping pesto. The intense flavor of sun-ripened dried tomatoes blends beautifully with the aroma of fresh basil. Ideal for traditional pasta dishes, warm bruschetta, or as an accompaniment to aged cheeses.</p><p><br />Ingredients: dried tomatoes (tomato, salt), <strong>peeled almonds</strong>, dried basil, sunflower seed oil, chili pepper, sugar.<em><strong> </strong></em></p><p><br /></p>",
+  "allergensHtml": "<p><strong>May contain: gluten, soy, sesame, other tree nuts, lupins, peanuts</strong></p>",
+  "tips": "Perfect for pairing with pasta dishes or bruschetta. \nKeep away from direct sunlight. Once opened, keep refrigerated and consume within 3–4 days.",
+  "conservation": "36 months",
+  "weightLabel": "Available weights",
+  "weights": [
+   "190g",
+   "1 kg",
+   "3kg"
+  ],
+  "jarImage": "/sites/agrumea/pestorosso-jar.png",
+  "labelImage": "/sites/agrumea/pestorosso-label.jpg",
+  "previewImage": "/sites/agrumea/pestorosso-preview.png",
+  "gallery": [
+   "/sites/agrumea/pestorosso-g0.jpg",
+   "/sites/agrumea/pestorosso-g1.jpg",
+   "/sites/agrumea/pestorosso-g2.jpg"
+  ],
+  "fruitSvg": "/sites/agrumea/pestorosso-fruit.svg",
+  "seoTitle": "Iblean Red Pesto | Agrumea Farm",
+  "seoDescription": "Agrumea Farm Iblean red pesto with sun-dried tomatoes, almonds and basil: rich, intense and ideal for pasta, bruschetta and aged cheeses."
+ },
+ {
+  "slug": "fregole_bacche",
+  "title": "Strawberry and Goji Berry",
+  "heroTitleHtml": "Strawberry and Goji Berry",
+  "category": "marmellate",
+  "categoryName": "Marmelade and Jams",
+  "themeColor": "#FFC6B8",
+  "descriptionHtml": "<p>With a fresh, exotic flavor. Bright ruby color and a smooth texture.</p><p><br />Ingredients: strawberry, sugar, lemon juice, Goji berries (0.3%), gelling agent: pectin.</p><p></p>",
+  "allergensHtml": "",
+  "tips": "Delicious with fresh ricotta and creamy cheeses. Keep away from heat sources and direct sunlight. After opening, store in the refrigerator and consume within 3-4 days.",
+  "conservation": "36 months",
+  "weightLabel": "Available weights",
+  "weights": [
+   "240g",
+   "1.2kg"
+  ],
+  "jarImage": "/sites/agrumea/fregole_bacche-jar.png",
+  "labelImage": "/sites/agrumea/fregole_bacche-label.jpg",
+  "previewImage": "/sites/agrumea/fregole_bacche-preview.png",
+  "gallery": [
+   "/sites/agrumea/fregole_bacche-g0.jpg",
+   "/sites/agrumea/fregole_bacche-g1.jpg",
+   "/sites/agrumea/fregole_bacche-g2.jpg"
+  ],
+  "fruitSvg": "/sites/agrumea/fregole_bacche-fruit.svg",
+  "seoTitle": "Extra Strawberry and Goji Berry Jam | Agrumea Farm",
+  "seoDescription": "Agrumea extra strawberry and goji berry jam: fresh and exotic flavour, bright ruby colour and soft texture."
+ },
+ {
+  "slug": "smeralda",
+  "title": "Pistachio Cream",
+  "heroTitleHtml": "Pistachio <br>Cream",
+  "category": "spalmabili",
+  "categoryName": "Spreadable Creams",
+  "themeColor": "#E6FFC7",
+  "descriptionHtml": "<p>Sweetly flavored and enveloping. Bright green color, spreadable texture.</p><p>Ingredients: sugar, vegetable oils and fats (sunflower, palm), <strong>pistachio 40%</strong>, <strong>whole milk, skimmed milk powder,</strong> <strong>whey powder</strong>, emulsifier: sunflower lecithin, flavoring.</p>",
+  "allergensHtml": "<p><strong>May contain: Almonds, Walnuts, Hazelnuts, Cashews.</strong></p>",
+  "tips": "Delicious for filling croissants, tarts or crepes. Keep away from heat sources and direct sunlight. After opening, store in the refrigerator and consume within 3-4 days.",
+  "conservation": "18 months",
+  "weightLabel": "Available weights",
+  "weights": [
+   "30g",
+   "190g",
+   "1kg",
+   "3kg"
+  ],
+  "jarImage": "/sites/agrumea/smeralda-jar.png",
+  "labelImage": "/sites/agrumea/smeralda-label.jpg",
+  "previewImage": "/sites/agrumea/smeralda-preview.png",
+  "gallery": [
+   "/sites/agrumea/smeralda-g0.jpg",
+   "/sites/agrumea/smeralda-g1.jpg",
+   "/sites/agrumea/smeralda-g2.jpg"
+  ],
+  "fruitSvg": "/sites/agrumea/smeralda-fruit.svg",
+  "seoTitle": "Smeralda - Pistachio Cream | Agrumea Farm",
+  "seoDescription": "Smeralda Agrumea Farm is a 40% pistachio spread, sweet and rich, with a bright green colour and a smooth texture."
+ },
+ {
+  "slug": "gelsi_neri",
+  "title": "Extra Black Mulberry Jam",
+  "heroTitleHtml": "Extra Black Mulberry Jam",
+  "category": "marmellate",
+  "categoryName": "Marmelade and Jams",
+  "themeColor": "#D7DEF2",
+  "descriptionHtml": "<p>Intense and deep flavor. Full-bodied, enveloping texture with a brilliant deep purple color. Ingredients: Black Mulberry, sugar, lemon juice, gelling agent: pectin.</p>",
+  "allergensHtml": "",
+  "tips": "Excellent with aged pecorino and blue cheeses. Keep away from heat sources and direct sunlight. After opening, store in the refrigerator and consume within 3-4 days.",
+  "conservation": "36 months",
+  "weightLabel": "Available weights",
+  "weights": [
+   "240g",
+   "1.2kg"
+  ],
+  "jarImage": "/sites/agrumea/gelsi_neri-jar.png",
+  "labelImage": "/sites/agrumea/gelsi_neri-label.jpg",
+  "previewImage": "/sites/agrumea/gelsi_neri-preview.png",
+  "gallery": [
+   "/sites/agrumea/gelsi_neri-g0.jpg",
+   "/sites/agrumea/gelsi_neri-g1.jpg",
+   "/sites/agrumea/gelsi_neri-g2.jpg"
+  ],
+  "fruitSvg": "/sites/agrumea/gelsi_neri-fruit.svg",
+  "seoTitle": "Extra Black Mulberry Jam | Agrumea Farm",
+  "seoDescription": "Agrumea extra black mulberry jam: intense, deep flavour with a rich texture and a bright dark purple colour."
+ },
+ {
+  "slug": "cipolla",
+  "title": "Sweet and Sour Onions",
+  "heroTitleHtml": "Sweet and <br>Sour Onions",
+  "category": "salati",
+  "categoryName": "Savoury",
+  "themeColor": "#FFE9D7",
+  "descriptionHtml": "<p>Soft, fragrant, and perfectly balanced between sweet and tangy. The natural sweetness of onion meets the lively note of vinegar in a great classic of the Mediterranean tradition.</p><p>Ingredients: onions (76%), extra virgin olive oil, <strong>pine nuts</strong>, salt, sultana raisins, balsamic vinegar, white wine vinegar <strong>(contains sulfites)</strong>, fresh mint, sugar.</p>",
+  "allergensHtml": "<p>May contain: gluten, soy, sesame, other tree nuts, lupins, peanuts</p>",
+  "tips": "Ideal for pairing with cured meat and cheese boards, focaccia, pizza, and bruschetta. Keep away from direct sunlight. After opening, store in the refrigerator and consume within 3–4 days.",
+  "conservation": "36 months",
+  "weightLabel": "Available weights",
+  "weights": [
+   "190g",
+   "1kg",
+   "3kg"
+  ],
+  "jarImage": "/sites/agrumea/cipolla-jar.png",
+  "labelImage": "/sites/agrumea/cipolla-label.jpg",
+  "previewImage": "/sites/agrumea/cipolla-preview.png",
+  "gallery": [
+   "/sites/agrumea/cipolla-g0.jpg",
+   "/sites/agrumea/cipolla-g1.jpg",
+   "/sites/agrumea/cipolla-g2.jpg"
+  ],
+  "fruitSvg": "/sites/agrumea/cipolla-fruit.svg",
+  "seoTitle": "Sweet and Sour Onion | Agrumea Farm",
+  "seoDescription": "Agrumea Farm sweet and sour onion: soft and aromatic, made with 76% onions, vinegar, pine nuts, raisins and fresh mint."
+ },
+ {
+  "slug": "mennulata",
+  "title": "Almond Spread",
+  "heroTitleHtml": "Almond <br>Spread",
+  "category": "spalmabili",
+  "categoryName": "Spreadable Creams",
+  "themeColor": "#F0D6C5",
+  "descriptionHtml": "<p>Sweetly flavored and enveloping. Spreadable texture.</p><p>Ingredients: sugar, vegetable oils and fats (sunflower, palm kernel, palm), <strong>almonds 40%</strong>, <strong>skimmed milk powder, whey powder,</strong> emulsifier: sunflower lecithin, flavoring.</p>",
+  "allergensHtml": "<p><strong>May contain: Pistachios, Walnuts, Hazelnuts, Cashews, and Pine Nuts.</strong></p>",
+  "tips": "Delicious for filling croissants, tarts or crepes. Keep away from heat sources and direct sunlight. After opening, store in the refrigerator and consume within 3-4 days.",
+  "conservation": "18 months",
+  "weightLabel": "Available weights",
+  "weights": [
+   "30g",
+   "190g",
+   "1kg",
+   "3kg"
+  ],
+  "jarImage": "/sites/agrumea/mennulata-jar.png",
+  "labelImage": "/sites/agrumea/mennulata-label.jpg",
+  "previewImage": "/sites/agrumea/mennulata-preview.png",
+  "gallery": [
+   "/sites/agrumea/mennulata-g0.jpg",
+   "/sites/agrumea/mennulata-g1.jpg",
+   "/sites/agrumea/mennulata-g2.jpg"
+  ],
+  "fruitSvg": "/sites/agrumea/mennulata-fruit.svg",
+  "seoTitle": "Almond Spread | Agrumea Farm",
+  "seoDescription": "Agrumea Farm almond spread, sweet and rich, containing 40% almonds. Ideal for croissants, tarts and crêpes."
+ },
+ {
+  "slug": "pera_cannella",
+  "title": "Pear and Cinnamon",
+  "heroTitleHtml": "Pear and <br>Cinnamon",
+  "category": "marmellate",
+  "categoryName": "Marmelade and Jams",
+  "themeColor": "#F1FBBF",
+  "descriptionHtml": "<p>Delicate and enveloping, the natural sweetness of the pear is balanced by the spicy warmth of cinnamon. A silky texture and a captivating aroma.</p><p><br />Ingredients: pears, sugar, lemon juice, gelling agent: pectin, cinnamon (0.5%)</p><p><br /></p>",
+  "allergensHtml": "",
+  "tips": "Perfect with gorgonzola and soft cheeses. Keep away from heat sources and direct sunlight. After opening, store in the refrigerator and consume within 3-4 days.",
+  "conservation": "36 months",
+  "weightLabel": "Available weights",
+  "weights": [
+   "240g",
+   "1.2kg"
+  ],
+  "jarImage": "/sites/agrumea/pera_cannella-jar.png",
+  "labelImage": "/sites/agrumea/pera_cannella-label.jpg",
+  "previewImage": "/sites/agrumea/pera_cannella-preview.png",
+  "gallery": [
+   "/sites/agrumea/pera_cannella-g0.jpg",
+   "/sites/agrumea/pera_cannella-g1.jpg",
+   "/sites/agrumea/pera_cannella-g2.jpg"
+  ],
+  "fruitSvg": "/sites/agrumea/pera_cannella-fruit.svg",
+  "seoTitle": "Extra Pear and Cinnamon Jam | Agrumea Farm",
+  "seoDescription": "Agrumea extra pear and cinnamon jam: delicate, silky and enveloping, with the natural sweetness of pear and the warm spice of cinnamon."
+ }
+]

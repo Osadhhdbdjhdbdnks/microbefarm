@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="300" viewBox="0 0 1000 300">
+  <title>MICROBE Farm wordmark</title>
+  <rect width="100%" height="100%" fill="none"/>
+  <g fill="#A94F18" text-anchor="middle">
+    <text x="500" y="112" font-family="Georgia, 'Times New Roman', serif" font-size="76" letter-spacing="10">MICROBE</text>
+    <text x="500" y="172" font-family="Georgia, 'Times New Roman', serif" font-size="46" font-style="italic" letter-spacing="2">Farm</text>
+    <g transform="translate(500 214)" stroke="#A94F18" stroke-width="2" fill="none">
+      <path d="M-58 0 H-22 M22 0 H58"/>
+    </g>
+    <g transform="translate(500 214)" fill="#A94F18">
+      <path d="M-15 -11 C-15 1 -7 9 0 13 C0 1 -5 -8 -15 -11Z"/>
+      <path d="M15 -11 C15 1 7 9 0 13 C0 1 5 -8 15 -11Z"/>
+    </g>
+    <text x="500" y="266" font-family="Arial, Helvetica, sans-serif" font-size="17" letter-spacing="5">PURE FRUITS  ·  NATURAL GOODNESS  ·  FROM OUR FARM</text>
+  </g>
+</svg>

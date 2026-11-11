@@ -1,0 +1,19 @@
+
+> ai-website-clone-template@0.6.1 dev
+> next dev
+
+▲ Next.js 16.3.5 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://21.0.6.118:3000
+✓ Ready in 548ms
+✓ Running next.config.ts took 45ms
+
+ GET / 200 in 679ms (next.js: 342ms, application-code: 336ms)
+ GET / 200 in 306ms (next.js: 237ms, application-code: 69ms)
+ GET / 200 in 54ms (next.js: 3ms, application-code: 50ms)
+ GET / 200 in 59ms (next.js: 5ms, application-code: 54ms)
+ GET / 200 in 55ms (next.js: 6ms, application-code: 49ms)
+ GET /dispensa 200 in 1808ms (next.js: 1596ms, application-code: 212ms)
+ GET /chi-siamo 200 in 599ms (next.js: 475ms, application-code: 124ms)
+ GET /contatti 200 in 557ms (next.js: 444ms, application-code: 114ms)
+ GET / 200 in 94ms (next.js: 4ms, application-code: 90ms)

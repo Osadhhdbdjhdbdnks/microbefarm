@@ -1,0 +1,1053 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ============================================================
+Agrumea Farm — Design Tokens（v7 森林 token 已并入）
+============================================================ */
+:root {
+  --color-orange: #e94e1b;
+  --color-border-brand: #762530;
+  --color-white: #fdf3eb;
+  --color-yellow: #f39200;
+  --color-ink: #2b2b4e;
+  --color-plum: #56275f;
+  --color-brown: #752f0b;
+  --color-red: #a31814;
+  --color-cream-dark: #f4e9dd;
+  
+  /* 新增：森林绿（用于信息栏） */
+  --color-forest-info: #263A20;
+
+  --font-sans: "ivystyle-sans", "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-serif: "ivymode", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  
+  --text-small: 0.875rem;
+  --text-base: 1rem;
+  --text-medium: clamp(1.125rem, calc(1.085rem + 0.165vw), 1.25rem);
+  --text-large: 2rem;
+  --text-hero: clamp(2.65rem, calc(1.359rem + 0.1vw), 1.938rem);
+  --text-display: clamp(2.5rem, calc(1rem + 8vw), 12rem);
+  
+  --line-height-s: 1.2;
+  --line-height-m: 1.3;
+  --border-round: 15px;
+  --container-padding: clamp(30px, 2vw, 40px);
+  --grid-columns: 12;
+  --grid-gap-x: clamp(12px, 1.45vw, 30px);
+  --header-pad-y: 24px;
+  --header-brand-width: 108px;
+  --app-height: 100svh;
+  --space-s: 2.5rem;
+  --space-xs: 3.75rem;
+  --space-l: 3rem;
+  
+  --ease-premium: cubic-bezier(0.645, 0.045, 0.355, 1);
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  
+  --fruit-marquee-top: 45%;
+  --fruit-marquee-w: 100vw;
+  --fruit-marquee-h: min(560px, 70vh);
+  --fruit-marquee-angle: 4deg;
+  --fruit-item-w: clamp(120px, 24.33vw, 200px);
+  --fruit-item-h: calc(var(--fruit-item-w) * 1.6);
+  
+  --background: var(--color-white);
+  --foreground: var(--color-border-brand);
+  --card: var(--color-white);
+  --card-foreground: var(--color-border-brand);
+  --popover: var(--color-white);
+  --popover-foreground: var(--color-border-brand);
+  --primary: var(--color-orange);
+  --primary-foreground: var(--color-white);
+  --secondary: var(--color-cream-dark);
+  --secondary-foreground: var(--color-border-brand);
+  --muted: var(--color-cream-dark);
+  --muted-foreground: var(--color-brown);
+  --accent: var(--color-yellow);
+  --accent-foreground: var(--color-white);
+  --destructive: var(--color-red);
+  
+  --border: color-mix(in srgb, var(--color-border-brand) 20%, transparent);
+  --input: color-mix(in srgb, var(--color-border-brand) 25%, transparent);
+  --ring: var(--color-orange);
+  
+  --color-rust: #b4501e;
+  --color-terracotta: #7e332b;
+  --color-terracotta-top: #9c4a3c;
+  
+  /* v7 森林 token */
+  --forest-950: #16220f;
+  --forest-900: #1e2f16;
+  --forest-800: #2a4020;
+  --forest-600: #3d5a2e;
+  --leaf-accent: #a8c686;
+  --cream: #f4efe4;
+  --cream-dim: rgba(244, 239, 228, 0.72);
+}
+
+@media (min-width: 768px) {
+  :root {
+    --header-pad-y: 30px;
+    --header-brand-width: 135px;
+    --fruit-marquee-top: 55%;
+    --fruit-marquee-h: 560px;
+    --text-hero: clamp(4.1rem, calc(2.65rem + 5.95vw), 8rem);
+    --text-display: clamp(4rem, calc(2.9rem + 11vw), 14rem);
+    --space-l: 6.25rem;
+    --line-height-s: 1;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
+  --font-heading: var(--font-serif);
+  --color-orange: var(--color-orange);
+  --color-brand-border: var(--color-border-brand);
+  --color-cream: var(--color-white);
+  --color-cream-dark: var(--color-cream-dark);
+  --color-yellow-brand: var(--color-yellow);
+  --color-ink: var(--color-ink);
+}
+
+@layer base {
+  * { border-color: var(--border); }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--color-white);
+    color: var(--color-border-brand);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Header（base + 森林版） ---------- */
+.site-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  padding: var(--header-pad-y) var(--container-padding);
+  color: var(--cream);
+  pointer-events: none;
+}
+.site-header--forest .fh-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  pointer-events: auto;
+}
+.fh-logo {
+  font-family: var(--font-serif);
+  color: var(--cream);
+  text-decoration: none;
+  font-size: clamp(20px, 2.2vw, 28px);
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+.fh-logo span { display: block; font-style: italic; font-size: 0.72em; margin-top: 2px; }
+.fh-nav { display: flex; gap: clamp(1.2rem, 2.6vw, 2.6rem); }
+.fh-nav a {
+  color: var(--cream-dim);
+  text-decoration: none;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  transition: color 0.25s var(--ease-soft);
+}
+.fh-nav a:hover, .fh-nav a[aria-current="page"] { color: var(--cream); }
+.fh-cta {
+  border: 1px solid var(--cream);
+  color: var(--cream);
+  border-radius: 999px;
+  padding: 0.55rem 1.2rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.3s var(--ease-soft), color 0.3s var(--ease-soft);
+}
+.fh-cta:hover { background: var(--cream); color: var(--forest-900); }
+.fh-burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 6px;
+}
+.fh-burger span { width: 22px; height: 2px; background: var(--cream); display: block; }
+.fh-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: var(--forest-900);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6rem;
+}
+.fh-menu ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.4rem; text-align: center; }
+.fh-menu a { color: var(--cream); text-decoration: none; font-family: var(--font-serif); font-size: 1.7rem; }
+.fh-menu__close {
+  position: absolute;
+  top: 20px; right: 22px;
+  background: none; border: 0;
+  color: var(--cream);
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+.fh-cta--menu { font-family: var(--font-sans); }
+@media (max-width: 900px) {
+  .fh-nav, .site-header--forest .fh-cta { display: none; }
+  .fh-burger { display: inline-flex; }
+}
+@media (min-width: 901px) { .fh-menu { display: none; } }
+
+/* 页脚用双行字标 */
+.site-header__wordmark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-decoration: none;
+  color: inherit;
+  font-family: var(--font-serif);
+  line-height: 1;
+}
+.site-header__wordmark-main { font-size: clamp(26px, 3vw, 40px); letter-spacing: 0.08em; font-weight: 500; }
+.site-header__wordmark-sub { font-size: clamp(18px, 2vw, 26px); font-style: italic; }
+
+/* ---------- Legal footer ---------- */
+.site-shell__legal {
+  position: fixed;
+  bottom: 0; right: 0;
+  z-index: 30;
+  padding: 1rem var(--container-padding);
+  mix-blend-mode: difference;
+}
+.site-legal__link {
+  color: var(--color-white);
+  text-decoration: none;
+  font-size: var(--text-small);
+  letter-spacing: 0.06em;
+  opacity: 0.8;
+}
+.site-legal__link:hover { opacity: 1; text-decoration: underline; }
+
+/* ---------- Pantry ---------- */
+.pantry-hero {
+  padding: calc(var(--header-pad-y) * 3 + var(--header-brand-width)) var(--container-padding) var(--space-l);
+  text-align: center;
+}
+.pantry-hero__title {
+  font-family: var(--font-serif);
+  font-size: var(--text-display);
+  line-height: var(--line-height-s);
+  color: var(--color-border-brand);
+  margin: 0 0 1rem;
+}
+.pantry-hero__lead { font-size: var(--text-medium); max-width: 46ch; margin: 0 auto; color: var(--color-brown); }
+.pantry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  gap: var(--space-s) var(--grid-gap-x);
+  padding: 0 var(--container-padding) var(--space-xl, 8rem);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.product-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  padding: 1.5rem 1rem;
+  border-radius: var(--border-round);
+  transition: background 0.35s var(--ease-soft), transform 0.35s var(--ease-soft);
+}
+.product-card:hover { background: var(--color-cream-dark); transform: translateY(-6px); }
+.product-card__image {
+  height: 260px; width: auto; max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 24px color-mix(in srgb, var(--color-border-brand) 18%, transparent));
+  transition: transform 0.42s var(--ease-soft);
+}
+.product-card:hover .product-card__image { transform: scale(1.05) rotate(-2deg); }
+.product-card__name { font-family: var(--font-serif); font-size: var(--text-medium); line-height: var(--line-height-m); text-align: center; }
+.product-card__cta { font-size: var(--text-small); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-orange); }
+.pantry-category__head { text-align: center; padding: var(--space-s) var(--container-padding) 0; }
+.pantry-category__title {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: var(--line-height-s);
+  color: var(--color-border-brand);
+  margin: 0 0 0.5rem;
+}
+.pantry-category__blurb { color: var(--color-brown); font-size: var(--text-medium); max-width: 52ch; margin: 0 auto; }
+.pantry-category__head + .pantry-grid { padding-top: var(--space-s); }
+.pantry-category { scroll-margin-top: 140px; }
+
+/* ---------- Story / Contacts / CTA / Experience ---------- */
+.story-section { padding: var(--space-xl, 8rem) var(--container-padding); max-width: 1100px; margin: 0 auto; }
+.story-section--tint { background: var(--color-cream-dark); max-width: none; }
+.story-section--tint > .story-inner { max-width: 1100px; margin: 0 auto; }
+.story-kicker { font-size: var(--text-small); letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-orange); margin: 0 0 1rem; }
+.story-title { font-family: var(--font-serif); font-size: var(--text-hero); line-height: var(--line-height-s); margin: 0 0 1.5rem; color: var(--color-border-brand); }
+.story-text { font-size: var(--text-medium); line-height: var(--line-height-m); color: var(--color-brown); max-width: 62ch; }
+.story-text + .story-text { margin-top: 1rem; }
+.story-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-s); margin-top: var(--space-l); }
+.story-stat__value { font-family: var(--font-serif); font-size: clamp(2.5rem, 5vw, 4rem); color: var(--color-orange); line-height: 1; }
+.story-stat__label { font-size: var(--text-small); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.5rem; color: var(--color-brown); }
+.contact-list { display: flex; flex-direction: column; gap: 1rem; margin-top: var(--space-s); }
+.contact-item { font-size: var(--text-medium); }
+.contact-item a { color: var(--color-orange); text-decoration: none; }
+.contact-item a:hover { text-decoration: underline; }
+.cta-pill {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
+  background: var(--color-orange); color: var(--color-white);
+  border-radius: 999px;
+  min-height: clamp(56px, 6vw, 72px);
+  padding: 0.75rem 2rem;
+  font-size: var(--text-small); letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none;
+  box-shadow: 0 18px 38px color-mix(in srgb, var(--color-border-brand) 16%, transparent);
+  transition: transform 0.35s var(--ease-soft), background 0.35s var(--ease-soft);
+}
+.cta-pill:hover { background: var(--color-yellow); transform: translateY(-3px); }
+.cta-pill--outline { background: transparent; color: var(--color-orange); border: 1.5px solid currentColor; box-shadow: none; }
+.cta-pill--outline:hover { background: var(--color-orange); color: var(--color-white); }
+.experience-banner {
+  min-height: 60vh;
+  display: grid; place-items: center; text-align: center;
+  padding: var(--space-xl, 8rem) var(--container-padding);
+  background: radial-gradient(circle at 50% 120%, color-mix(in srgb, var(--color-yellow) 28%, var(--color-white)), var(--color-white) 60%);
+}
+
+/* ---------- FruitSlider 通用层 ---------- */
+.fruit-slider {
+  height: var(--app-height);
+  min-height: var(--app-height);
+  isolation: isolate;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+.fruit-slider__canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  width: 100%; height: 100%;
+  display: block;
+}
+.fruit-slider__wrapper {
+  cursor: grab;
+  inset: 0;
+  overflow: hidden;
+  position: absolute;
+  touch-action: none;
+  z-index: 5;
+}
+.fruit-slider__wrapper:active { cursor: grabbing; }
+.fruit-slider__shadows { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.fruit-shadow {
+  position: absolute; left: 0; top: 0;
+  width: 200px; height: 60px; margin: -30px 0 0 -100px;
+  border-radius: 50%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(10, 18, 6, 0.55) 0%, rgba(10, 18, 6, 0.30) 46%, rgba(10, 18, 6, 0) 76%);
+  mix-blend-mode: multiply;
+  filter: blur(7px);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.fruit-shadow--core {
+  width: 120px; height: 30px; margin: -15px 0 0 -60px;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(6, 12, 4, 0.80) 0%, rgba(6, 12, 4, 0.45) 52%, rgba(6, 12, 4, 0) 80%);
+  filter: blur(3px);
+}
+.fruit-info-card {
+  position: absolute;
+  bottom: 9%; left: 50%;
+  z-index: 6;
+  pointer-events: none;
+  text-align: center;
+  opacity: 0;
+  transform: translateX(-50%) translateY(12px);
+  transition: opacity 0.4s var(--ease-soft), transform 0.4s var(--ease-soft);
+}
+.fruit-info-card.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.fruit-info-card__name { font-family: var(--font-serif); font-size: clamp(22px, 2.4vw, 32px); color: var(--cream); letter-spacing: 0.04em; margin: 0 0 4px; }
+.fruit-info-card__origin { font-family: var(--font-sans); font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--leaf-accent); opacity: 0.9; margin: 0 0 8px; }
+.fruit-info-card__desc { font-family: var(--font-sans); font-size: 13px; line-height: 1.5; color: var(--cream-dim); opacity: 0.95; max-width: 400px; margin: 0 auto; }
+.fruit-discover {
+  position: absolute; left: 0; top: 0;
+  z-index: 7;
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  padding: 0.7rem 1.15rem;
+  border-radius: 999px;
+  background: var(--cream);
+  color: var(--forest-900);
+  font-family: var(--font-sans);
+  font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 12px 30px rgba(8, 14, 4, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s var(--ease-soft);
+  will-change: transform, opacity;
+}
+.fruit-discover::before {
+  content: "";
+  width: 8px; height: 8px; flex: 0 0 auto;
+  background: var(--leaf-accent);
+  transform: rotate(45deg);
+}
+@media (max-width: 767px) { .fruit-discover { display: none; } }
+
+/* ============================================================
+v7 — FOREST STAGE（首页）
+============================================================ */
+.fruit-slider--forest { background: var(--forest-800); }
+.fs-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    url("/assets/agrumea/hero-forest-desktop.jpg") center 62% / cover no-repeat,
+    radial-gradient(120% 90% at 72% 8%, #4a6a38 0%, rgba(74, 106, 56, 0) 62%),
+    linear-gradient(180deg, #33502a 0%, #2b4522 55%, #22371c 100%);
+}
+.fs-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(95% 75% at 50% 42%, rgba(0, 0, 0, 0) 42%, rgba(10, 18, 6, 0.42) 100%);
+}
+.fs-copy {
+  position: absolute;
+  z-index: 4;
+  left: var(--container-padding);
+  top: 20%;
+  max-width: 560px;
+  color: var(--cream);
+  pointer-events: none;
+}
+.fs-eyebrow { margin: 0 0 1.2rem; font-size: 11px; letter-spacing: 0.34em; text-transform: uppercase; color: var(--cream-dim); }
+.fs-title { margin: 0; font-family: var(--font-serif); font-size: clamp(3rem, 7vw, 6.5rem); line-height: 0.95; color: var(--cream); }
+.fs-title span { display: block; font-style: italic; font-size: 0.55em; margin-top: 0.08em; }
+.fs-sub { margin: 1.1rem 0 1.6rem; font-size: clamp(1rem, 1.4vw, 1.25rem); color: var(--cream-dim); }
+.fs-cta {
+  pointer-events: auto;
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  border: 1px solid var(--cream); 
+  color: var(--cream);
+  border-radius: 999px;
+  padding: 0.8rem 1.6rem;
+  font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.3s var(--ease-soft), color 0.3s var(--ease-soft);
+}
+.fs-cta:hover { background: var(--cream); color: var(--forest-900); }
+.fs-scroll {
+  position: absolute;
+  z-index: 5;
+  left: var(--container-padding);
+  bottom: 6%;
+  width: 46px; height: 46px;
+  border: 1px solid var(--cream);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  color: var(--cream);
+}
+.fs-scroll svg { width: 20px; height: 20px; animation: fs-bob 2.4s ease-in-out infinite; }
+@keyframes fs-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); } 
+}
+@media (max-width: 767px) {
+  .fs-bg {
+    background:
+      url("/assets/agrumea/hero-forest-mobile.jpg") center 68% / cover no-repeat,
+      radial-gradient(120% 90% at 72% 8%, #4a6a38 0%, rgba(74, 106, 56, 0) 62%),
+      linear-gradient(180deg, #33502a 0%, #2b4522 55%, #22371c 100%);
+  }
+  .fs-copy {
+    left: 50%;
+    transform: translateX(-50%);
+    top: 15%;
+    width: 86%;
+    max-width: none;
+    text-align: center;
+  }
+  .fs-eyebrow { margin-bottom: 0.9rem; }
+  .fs-sub { margin: 0.9rem 0 1.3rem; }
+  .fs-scroll { left: 50%; margin-left: -23px; bottom: 4%; }
+  .fruit-info-card { bottom: 12%; }
+}
+
+/* ============================================================
+Product Detail（pdm + 滚动英雄）——保留现有详情页样式
+============================================================ */
+body:has(.pdm) .site-header { color: var(--color-border-brand); }
+.pdm { position: relative; background: var(--color-white); }
+.pdm__hero {
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  padding-top: calc(var(--header-pad-y) * 2 + 48px);
+}
+
+/* ========== 修改产品标题字体 ========== */
+.pdm__title {
+  margin: 4vh auto 0;
+  max-width: 1500px;
+  padding: 0 4vw;
+  text-align: center;
+  text-transform: uppercase;
+  text-wrap: balance;
+  font-family: var(--font-cormorant), var(--font-serif); /* 改为 Cormorant Garamond */
+  color: var(--color-orange);
+  font-size: clamp(3rem, 10.5vw, 9.5rem);
+  line-height: 0.98;
+  letter-spacing: 0.015em;
+}
+
+.pdm__media {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  z-index: 2;
+  width: clamp(280px, 32vw, 520px);
+  aspect-ratio: 1 / 1.25;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+  filter: drop-shadow(0 50px 60px rgba(90, 30, 15, 0.28));
+  overflow: visible;
+}
+.pdm__media img,
+.pdm__media .pd-viewer { width: 100%; height: 100%; object-fit: contain; display: block; }
+.pd-viewer { width: 100%; height: 100%; display: block; }
+
+.pdm__cat,
+.pdm__origin {
+  position: absolute;
+  bottom: 13%;
+  z-index: 1;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 2.4vw, 2.4rem);
+  line-height: 1.15;
+  color: var(--color-border-brand);
+}
+.pdm__cat { left: var(--container-padding); max-width: 20ch; }
+.pdm__origin { right: var(--container-padding); text-align: right; }
+
+.pdm__story { padding: clamp(4rem, 9vw, 8rem) var(--container-padding) 0; text-align: center; }
+.pdm__wordmark { display: block; width: clamp(160px, 14vw, 240px); margin: 0 auto; }
+.pdm__wordmark-diamond { display: block; width: 10px; height: 10px; margin: 12px auto 0; background: var(--color-border-brand); transform: rotate(45deg); }
+.pdm__lead { margin: clamp(2.5rem, 6vw, 4.5rem) auto 0; max-width: 68ch; font-size: clamp(1.35rem, 2.6vw, 2.2rem); line-height: 1.35; color: var(--color-border-brand); }
+.pdm__note { margin: clamp(2rem, 5vw, 3.5rem) auto 0; font-size: clamp(1.2rem, 2.2vw, 1.9rem); color: var(--color-border-brand); }
+.pdm__diamond { display: block; width: 12px; height: 12px; margin: clamp(2.5rem, 6vw, 4rem) auto; background: var(--color-border-brand); transform: rotate(45deg); }
+
+.pdm__grid {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 var(--container-padding) clamp(4rem, 9vw, 8rem);
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 0.9fr 1fr;
+  border-top: 1px solid color-mix(in srgb, var(--color-border-brand) 25%, transparent);
+}
+.pdm__col { padding: 2.5rem 2rem 1rem 0; }
+.pdm__col + .pdm__col {
+  border-left: 1px solid color-mix(in srgb, var(--color-border-brand) 25%, transparent);
+  padding-left: 2rem;
+}
+
+/* ========== 修改信息栏标签和内容颜色为森林绿 ========== */
+.pdm__label { margin: 0 0 1.1rem; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-forest-info); }
+.pdm__text { margin: 0; color: var(--color-forest-info); font-size: 1.05rem; line-height: 1.55; }
+
+.pdm__weights { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.pdm__weight {
+  display: grid; place-items: center;
+  min-width: 64px; height: 64px; padding: 0 10px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--color-forest-info) 35%, transparent);
+  color: var(--color-forest-info);
+  font-size: 0.95rem;
+}
+
+.pdm__shelf { margin: 0; font-size: 1.35rem; color: var(--color-forest-info); }
+
+.pdm__buy { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.pdm__buy-link {
+  display: grid; place-items: center;
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--color-forest-info) 35%, transparent);
+  color: var(--color-forest-info);
+  transition: background 0.25s var(--ease-soft), color 0.25s var(--ease-soft), transform 0.25s var(--ease-soft);
+}
+.pdm__buy-link svg { width: 26px; height: 26px; }
+.pdm__buy-link:hover { background: var(--color-forest-info); color: var(--color-white); transform: translateY(-3px); }
+
+@media (max-width: 900px) {
+  .pdm__media { top: 55%; width: 62vw; aspect-ratio: 1 / 1.1; }
+  .pdm__cat { left: 5vw; bottom: 7%; }
+  .pdm__origin { right: 5vw; bottom: 7%; }
+  .pdm__grid { grid-template-columns: 1fr; }
+  .pdm__col { padding: 2rem 0 0; }
+  .pdm__col + .pdm__col {
+    border-left: 0;
+    border-top: 1px solid color-mix(in srgb, var(--color-border-brand) 25%, transparent);
+    padding-left: 0;
+    margin-top: 2rem;
+  }
+}
+
+/* 详情页滚动英雄（--ph 驱动） */
+.pdm-hero-scroll { position: relative; z-index: 0; }
+.pdm-hero-scroll__stage {
+  --ph: 0;
+  --jar-rise: 0vh;
+  --jar-rotate: 0deg;
+  --jar-scale-from: 1;
+  --jar-scale-to: 1;
+  --title-fall: 0vh;
+}
+.pdm-hero-scroll__stage .pdm__media { transform: translate(-50%, -50%); }
+.pdm-hero-scroll__stage .pdm__title { transform: none; }
+
+/* ---------- 页脚（森林化） ---------- */
+.site-footer { background: var(--forest-950); color: var(--cream); padding: clamp(3rem, 6vw, 5rem) var(--container-padding) 2rem; }
+.site-footer__inner { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: clamp(2rem, 4vw, 4rem); }
+.site-footer__wordmark { color: var(--cream); }
+.site-footer__tag { margin: 1rem 0 0; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.65; color: var(--cream-dim); }
+.site-footer__head { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--leaf-accent); margin: 0 0 1rem; }
+.site-footer__nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.site-footer__nav a { color: inherit; text-decoration: none; opacity: 0.8; transition: opacity 0.25s, color 0.25s; }
+.site-footer__nav a:hover { opacity: 1; color: var(--leaf-accent); }
+.site-footer__contact p { margin: 0 0 0.35rem; opacity: 0.8; font-size: var(--text-small); color: var(--cream-dim); }
+.site-footer__legal {
+  max-width: 1400px;
+  margin: clamp(2.5rem, 5vw, 4rem) auto 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(244, 239, 228, 0.18);
+  display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between;
+  font-size: 12px;
+  color: var(--cream-dim);
+}
+.site-footer__legal-links { display: flex; gap: 1.25rem; }
+.site-footer__legal-links a { color: inherit; text-decoration: none; }
+.site-footer__legal-links a:hover { text-decoration: underline; }
+@media (max-width: 900px) { .site-footer__inner { grid-template-columns: 1fr; } }
+
+/* ============================================================
+v17 — 森林环境动画：叶影漂移 + 光斑呼吸 + 前景叶摆动
+============================================================ */
+.fs-dapple,
+.fs-sun {
+  position: absolute;
+  inset: -12%;
+  z-index: 1;
+  pointer-events: none;
+}
+.fs-dapple {
+  background:
+    radial-gradient(26% 20% at 16% 20%, rgba(8, 20, 5, 0.34), rgba(8, 20, 5, 0) 70%),
+    radial-gradient(20% 16% at 68% 10%, rgba(8, 20, 5, 0.28), rgba(8, 20, 5, 0) 70%),
+    radial-gradient(24% 18% at 88% 44%, rgba(8, 20, 5, 0.24), rgba(8, 20, 5, 0) 70%),
+    radial-gradient(18% 14% at 38% 56%, rgba(8, 20, 5, 0.18), rgba(8, 20, 5, 0) 70%);
+  mix-blend-mode: multiply;
+  animation: fs-dapple-drift 14s ease-in-out infinite alternate;
+}
+.fs-sun {
+  background:
+    radial-gradient(22% 16% at 30% 18%, rgba(255, 246, 200, 0.20), rgba(255, 246, 200, 0) 70%),
+    radial-gradient(16% 12% at 78% 30%, rgba(255, 246, 200, 0.14), rgba(255, 246, 200, 0) 70%);
+  mix-blend-mode: screen;
+  animation: fs-sun-drift 18s ease-in-out infinite alternate;
+}
+@keyframes fs-dapple-drift {
+  0%   { transform: translate3d(-1.6%, -1%, 0) rotate(-0.5deg); opacity: 0.8; }
+  50%  { transform: translate3d(0.8%, 0.6%, 0) rotate(0.3deg);  opacity: 1; }
+  100% { transform: translate3d(1.8%, 1.4%, 0) rotate(0.7deg);  opacity: 0.85; }
+}
+@keyframes fs-sun-drift {
+  0%   { transform: translate3d(1.2%, 0.8%, 0) scale(1);    opacity: 0.7; }
+  100% { transform: translate3d(-1.4%, -1%, 0) scale(1.06); opacity: 1; }
+}
+.fs-leaves {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1.5%;
+  width: 100%;
+  z-index: 4;
+  pointer-events: none;
+  display: none; /* 默认隐藏，自检通过才显示 */
+  transform-origin: 50% 100%;
+  animation: fs-sway 7.5s ease-in-out infinite;
+}
+.fruit-slider--forest.fs-leaves-ok .fs-leaves { display: block; }
+@keyframes fs-sway {
+  0%, 100% { transform: rotate(0deg) translate3d(0, 0, 0); }
+  35%      { transform: rotate(0.5deg) translate3d(0.4%, -0.2%, 0); }
+  70%      { transform: rotate(-0.4deg) translate3d(-0.3%, 0.1%, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fs-dapple, .fs-sun, .fs-leaves { animation: none; }
+}
+
+/* ============================================================
+v18 — 背景光影：跟随树摆的光斑 + 叶影
+============================================================ */
+.fs-light {
+  position: absolute;
+  inset: -6%;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    url("/assets/agrumea/forest-light.jpg") center / cover no-repeat,
+    linear-gradient(115deg, rgba(255, 244, 200, 0) 0%, rgba(255, 244, 200, 0.12) 42%, rgba(255, 244, 200, 0) 68%);
+  mix-blend-mode: screen;
+  opacity: 0.55;
+  transform-origin: 50% 0%;
+  animation: fs-light-sway 7.5s ease-in-out infinite alternate;
+}
+@keyframes fs-light-sway {
+  0%   { transform: rotate(-0.6deg) translate3d(-1%, 0, 0);   opacity: 0.45; }
+  50%  { transform: rotate(0.3deg)  translate3d(0.6%, 0.4%, 0); opacity: 0.62; }
+  100% { transform: rotate(0.8deg)  translate3d(1.2%, 0.8%, 0); opacity: 0.50; }
+}
+.fs-dapple {
+  position: absolute;
+  inset: -8%;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(30% 22% at 18% 26%, rgba(8, 20, 5, 0.32), rgba(8, 20, 5, 0) 70%),
+    radial-gradient(24% 18% at 70% 14%, rgba(8, 20, 5, 0.26), rgba(8, 20, 5, 0) 70%),
+    radial-gradient(26% 20% at 88% 48%, rgba(8, 20, 5, 0.22), rgba(8, 20, 5, 0) 70%),
+    radial-gradient(20% 16% at 40% 60%, rgba(8, 20, 5, 0.16), rgba(8, 20, 5, 0) 70%);
+  mix-blend-mode: multiply;
+  transform-origin: 50% 0%;
+  animation: fs-dapple-sway 6s ease-in-out infinite alternate;
+}
+@keyframes fs-dapple-sway {
+  0%   { transform: rotate(0.5deg)  translate3d(0.8%, 0, 0);    opacity: 0.85; }
+  50%  { transform: rotate(-0.3deg) translate3d(-0.5%, 0.3%, 0); opacity: 1; }
+  100% { transform: rotate(-0.7deg) translate3d(-1%, 0.6%, 0);  opacity: 0.90; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fs-light, .fs-dapple { animation: none; }
+}
+
+/* ============================================================
+v19 — 森林光影 v2
+============================================================ */
+.fs-light {
+  position: absolute;
+  inset: -6%;
+  z-index: 1;
+  pointer-events: none;
+  background: url("/assets/agrumea/forest-bg.jpg") center / cover no-repeat;
+  mix-blend-mode: soft-light;
+  opacity: 0.6;
+  transform-origin: 50% 0%;
+  animation: fs-light-sway 7.5s ease-in-out infinite alternate;
+}
+@keyframes fs-light-sway {
+  0%   { transform: rotate(-0.6deg) translate3d(-1%, 0, 0);    opacity: 0.48; }
+  50%  { transform: rotate(0.3deg)  translate3d(0.6%, 0.4%, 0); opacity: 0.66; }
+  100% { transform: rotate(0.8deg)  translate3d(1.2%, 0.8%, 0); opacity: 0.52; }
+}
+.fs-dapple {
+  position: absolute;
+  inset: -8%;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(30% 22% at 18% 26%, rgba(8, 20, 5, 0.30), rgba(8, 20, 5, 0) 70%),
+    radial-gradient(24% 18% at 70% 14%, rgba(8, 20, 5, 0.24), rgba(8, 20, 5, 0) 70%),
+    radial-gradient(26% 20% at 88% 48%, rgba(8, 20, 5, 0.20), rgba(8, 20, 5, 0) 70%);
+  mix-blend-mode: multiply;
+  transform-origin: 50% 0%;
+  animation: fs-dapple-sway 6s ease-in-out infinite alternate;
+}
+@keyframes fs-dapple-sway {
+  0%   { transform: rotate(0.5deg)  translate3d(0.8%, 0, 0);     opacity: 0.85; }
+  50%  { transform: rotate(-0.3deg) translate3d(-0.5%, 0.3%, 0); opacity: 1; }
+  100% { transform: rotate(-0.7deg) translate3d(-1%, 0.6%, 0);   opacity: 0.90; }
+}
+/* 四角叶框 */
+.fs-leaves {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 4;
+  pointer-events: none;
+  display: none;
+  transform-origin: 50% 0%;
+  animation: fs-leaves-sway 7.5s ease-in-out infinite;
+}
+.fruit-slider--forest.fs-leaves-ok .fs-leaves { display: block; }
+@keyframes fs-leaves-sway {
+  0%, 100% { transform: rotate(0deg) translate3d(0, 0, 0); }
+  35%      { transform: rotate(0.4deg) translate3d(0.3%, 0.15%, 0); }
+  70%      { transform: rotate(-0.35deg) translate3d(-0.25%, 0.1%, 0); }
+}
+/* 层级微调 */
+.fruit-slider--forest .fs-copy { z-index: 5; }
+.fruit-slider--forest .fs-scroll { z-index: 6; }
+@media (prefers-reduced-motion: reduce) {
+  .fs-light, .fs-dapple, .fs-leaves { animation: none; }
+}
+
+/* ============================================================
+v20 — 树叶/光影改由 JS 驱动
+============================================================ */
+.fs-leaves,
+.fs-light {
+  animation: none !important;
+  will-change: transform, opacity;
+}
+.fs-leaves {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 4;
+  pointer-events: none;
+  display: none; /* JS 抠图成功后置 block */
+  transform-origin: 50% 8%;
+}
+.fs-light {
+  transform-origin: 50% 0%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fs-leaves, .fs-light { transform: none !important; }
+}
+
+/* ==== v7.14 层栈 ==== */
+.fruit-slider { --fs-bg-src: url("/assets/agrumea/hero-forest-desktop.jpg"); }
+.fruit-slider .fs-bg { background-image: var(--fs-bg-src); background-size: cover; background-position: 50% 62%; z-index: 1; }
+.fruit-slider .fs-stage {
+  position: absolute; inset: 0; pointer-events: none; display: none;
+  background-size: cover; background-position: 50% 100%;
+  will-change: transform; z-index: 2;
+}
+.fruit-slider .fs-leafshadow {
+  position: absolute; left: -6%; top: -6%; width: 112%; height: 112%;
+  object-fit: cover; pointer-events: none; display: none;
+  mix-blend-mode: multiply; opacity: 0;
+  filter: blur(10px) brightness(0.85) saturate(1.1);
+  will-change: transform, opacity; z-index: 3;
+}
+.fruit-slider .fs-dapple { position: absolute; inset: -4%; width: 108%; height: 108%;
+  pointer-events: none; opacity: 0; will-change: transform, opacity; z-index: 4; }
+.fruit-slider.fs-dapple-mult .fs-dapple { mix-blend-mode: multiply; }
+.fruit-slider .fs-light { position: absolute; inset: -4%; width: 108%; height: 108%;
+  pointer-events: none; will-change: transform, opacity; z-index: 5; }
+.fruit-slider.fs-light-screen .fs-light { mix-blend-mode: screen; }
+.fruit-slider .fs-vignette { z-index: 6; }
+.fruit-slider .fruit-slider__shadows { z-index: 7; }
+.fruit-slider .fruit-slider__canvas { z-index: 7; }
+.fruit-slider .fs-leaves { z-index: 9; }
+.fruit-slider .fs-copy { z-index: 10; }
+
+/* v7.17：树桩/石头提亮 */
+.fruit-slider .fs-stage { filter: brightness(1.22) saturate(1.10) contrast(1.03); }
+
+/* ============================================================
+v7.18 — 上帝射线 + 暗角加深 + 叶影锐化
+============================================================ */
+.fruit-slider .fs-rays {
+  position: absolute;
+  inset: -10%;
+  z-index: 6;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, transparent 40%, rgba(255, 246, 214, 0.17) 46%, transparent 54%),
+    linear-gradient(115deg, transparent 57%, rgba(255, 246, 214, 0.12) 63%, transparent 71%),
+    linear-gradient(115deg, transparent 24%, rgba(255, 246, 214, 0.10) 30%, transparent 38%),
+    linear-gradient(115deg, transparent 74%, rgba(255, 246, 214, 0.09) 80%, transparent 88%);
+  mix-blend-mode: screen;
+  opacity: 0.6;
+  filter: blur(6px);
+  will-change: transform, opacity;
+}
+/* 暗角加深 */
+.fruit-slider .fs-vignette {
+  background: radial-gradient(95% 75% at 50% 42%, rgba(0, 0, 0, 0) 40%, rgba(8, 16, 5, 0.52) 100%);
+}
+/* 叶影更实一点 */
+.fruit-slider .fs-leafshadow {
+  filter: blur(9px) brightness(0.8) saturate(1.15);
+}
+@media (prefers-reduced-motion: reduce) {
+  .fruit-slider .fs-rays { opacity: 0.5; }
+}
+
+/* ============================================================
+v21 — 暖光修正
+============================================================ */
+/* 1) 底图整体提亮增饱 */
+.fruit-slider .fs-bg {
+  filter: brightness(1.16) saturate(1.18) contrast(1.03);
+}
+/* 2) 环境叶影 */
+.fruit-slider .fs-dapple {
+  background:
+    repeating-linear-gradient(115deg,
+      rgba(10, 25, 8, 0) 0px,
+      rgba(10, 25, 8, 0.20) 42px,
+      rgba(10, 25, 8, 0) 74px,
+      rgba(10, 25, 8, 0) 130px),
+    radial-gradient(38% 30% at 20% 24%, rgba(10, 25, 8, 0.16), rgba(10, 25, 8, 0) 70%);
+  mix-blend-mode: soft-light;
+  filter: blur(6px);
+  animation: none !important;
+}
+.fruit-slider.fs-dapple-mult .fs-dapple { mix-blend-mode: soft-light; }
+/* 3) 暖光层 */
+.fruit-slider .fs-light {
+  background:
+    linear-gradient(115deg, rgba(255, 236, 170, 0) 30%, rgba(255, 236, 170, 0.35) 45%, rgba(255, 236, 170, 0) 60%),
+    linear-gradient(115deg, rgba(255, 236, 170, 0) 55%, rgba(255, 236, 170, 0.22) 68%, rgba(255, 236, 170, 0) 80%),
+    radial-gradient(60% 40% at 70% 12%, rgba(255, 240, 190, 0.30), rgba(255, 240, 190, 0) 70%);
+  mix-blend-mode: screen;
+  filter: blur(2px);
+  animation: none !important;
+}
+.fruit-slider.fs-light-screen .fs-light { mix-blend-mode: screen; }
+/* 4) 暗角减淡 */
+.fruit-slider .fs-vignette {
+  background: radial-gradient(95% 75% at 50% 42%, rgba(0, 0, 0, 0) 55%, rgba(8, 16, 5, 0.30) 100%);
+}
+/* 5) 接触阴影暖化 */
+.fruit-slider .fruit-shadow {
+  background: radial-gradient(50% 50% at 50% 50%, rgba(72, 42, 18, 0.42) 0%, rgba(72, 42, 18, 0.22) 46%, rgba(72, 42, 18, 0) 76%);
+  filter: blur(9px);
+}
+.fruit-slider .fruit-shadow--core {
+  background: radial-gradient(50% 50% at 50% 50%, rgba(52, 28, 10, 0.55) 0%, rgba(52, 28, 10, 0.30) 52%, rgba(52, 28, 10, 0) 80%);
+  filter: blur(4px);
+}
+/* 6) 动态叶影层减淡 */
+.fruit-slider .fs-leafshadow { filter: blur(12px) brightness(0.9) saturate(1.05); }
+
+/* ============================================================
+v7.23 — 幕布原色恢复 + 背景深度对齐设计图
+============================================================ */
+.fruit-slider .fs-stage { display: none !important; filter: none; }
+.fruit-slider .fs-bg {
+  filter: saturate(1.10) contrast(1.06) brightness(0.97);
+}
+.fruit-slider .fs-vignette {
+  background: radial-gradient(95% 75% at 50% 42%, rgba(0, 0, 0, 0) 45%, rgba(8, 16, 5, 0.48) 100%);
+}
+/* 叶框叠加略收敛 */
+.fruit-slider .fs-leaves { opacity: 0.9; }
+
+/* ============================================================
+v22 — 背景颜色分级对齐设计稿
+============================================================ */
+.fruit-slider .fs-bg {
+  filter: saturate(1.14) brightness(1.07) contrast(1.02);
+}
+.fruit-slider .fs-vignette {
+  background: radial-gradient(95% 75% at 50% 42%, rgba(0, 0, 0, 0) 55%, rgba(10, 18, 6, 0.30) 100%);
+}
+/* 若仍走绿幕桩层，桩色同步提暖 */
+.fruit-slider .fs-stage {
+  filter: brightness(1.05) saturate(1.08) contrast(1.02);
+}
+
+/* ============================================================
+v23 — forest-light-streaks.jpg 驱动光影
+============================================================ */
+.fruit-slider.fs-light-screen .fs-light {
+  mix-blend-mode: soft-light;
+  filter: blur(1px) saturate(1.15) contrast(1.05);
+}
+.fruit-slider.fs-dapple-mult .fs-dapple {
+  mix-blend-mode: multiply;
+  filter: blur(3px) saturate(1.05);
+  animation: none !important;
+}
+.fruit-slider .fs-bg {
+  filter: saturate(1.18) contrast(1.07) brightness(1.02);
+}
+.fruit-slider .fs-vignette {
+  background: radial-gradient(95% 75% at 50% 42%, rgba(0, 0, 0, 0) 48%, rgba(8, 16, 5, 0.38) 100%);
+}
+
+/* ============================================================
+v7.25 — 桩/石去绿染 + 背景光影形状互动
+============================================================ */
+/* 1) 环境叶影：暖中性色 + 自上而下淡出 mask */
+.fruit-slider .fs-dapple {
+  background:
+    repeating-linear-gradient(115deg,
+      rgba(26, 20, 10, 0) 0px,
+      rgba(26, 20, 10, 0.20) 42px,
+      rgba(26, 20, 10, 0) 74px,
+      rgba(26, 20, 10, 0) 130px),
+    radial-gradient(38% 30% at 20% 24%, rgba(26, 20, 10, 0.16), rgba(26, 20, 10, 0) 70%);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 55%, rgba(0, 0, 0, 0.25) 72%, rgba(0, 0, 0, 0) 88%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 55%, rgba(0, 0, 0, 0.25) 72%, rgba(0, 0, 0, 0) 88%);
+}
+.fruit-slider .fs-leafshadow {
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 60%, rgba(0, 0, 0, 0.3) 78%, rgba(0, 0, 0, 0) 92%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 60%, rgba(0, 0, 0, 0.3) 78%, rgba(0, 0, 0, 0) 92%);
+}
+/* 2) 暖光层 */
+.fruit-slider .fs-light {
+  background:
+    radial-gradient(46% 30% at 62% 80%, rgba(255, 214, 140, 0.30), rgba(255, 214, 140, 0) 70%),
+    radial-gradient(30% 20% at 30% 88%, rgba(255, 224, 170, 0.18), rgba(255, 224, 170, 0) 70%),
+    linear-gradient(115deg, rgba(255, 236, 170, 0) 30%, rgba(255, 236, 170, 0.35) 45%, rgba(255, 236, 170, 0) 60%),
+    linear-gradient(115deg, rgba(255, 236, 170, 0) 55%, rgba(255, 236, 170, 0.22) 68%, rgba(255, 236, 170, 0) 80%);
+  mix-blend-mode: screen;
+}
+/* 3) 鼠标跟随光池 */
+.fruit-slider .fs-pool {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 62vmax;
+  height: 62vmax;
+  z-index: 5;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255, 236, 180, 0.55), rgba(255, 236, 180, 0.22) 45%, rgba(255, 236, 180, 0) 72%);
+  mix-blend-mode: screen;
+  opacity: 0.3;
+  will-change: transform, opacity;
+}
+/* 4) 背景微暖化 */
+.fruit-slider .fs-bg {
+  filter: saturate(1.10) contrast(1.06) brightness(1.04) sepia(0.06);
+}
+@media (prefers-reduced-motion: reduce) {
+  .fruit-slider .fs-pool { display: none; }
+}
