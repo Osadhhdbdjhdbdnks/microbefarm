@@ -9,13 +9,10 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import { products, type Product } from "@/data/products";
 
 /* ============================================================
-FruitSlider v7.27 — Stump Landing Calibration
-· 按实测背景图校准：水果落点 = 桩面切面中部（非前沿前面）
-  - mobile plate：切面中心 y≈84.9%，前沿 y≈87.4%，桩横跨 x≈10%–93%
-  - desktop plate：切面中心 y≈72.7%，前沿 y≈77.8%，桩横跨 x≈37%–95%
-· 桌面三果中心对齐桩中心（rest 0.50）
-· 中间木瓜缩小至 1.02，避免压过桩前沿
-· 其余逻辑（拖拽/搓转/阵风/光影/Draco/并发加载）保持不变
+FruitSlider v7.28 — Vercel TS fix
+· FIX (TS2339 @308/309): makeShadowSprite 的 `if ("filter" in sg)` else 分支
+  被 TS 收窄为 never → 改 try/catch 兜底，sg 保持 CanvasRenderingContext2D
+· KEEP: v7.27 桩面校准 / 手机竖版叶框拼合 / 拖拽搓转 / 阵风 / 光影 / Draco
 ============================================================ */
 
 const PX2W = 1 / 100;
@@ -77,9 +74,9 @@ const STAGE_CANDIDATES: Record<"xs" | "sm" | "md", string[]> = {
 };
 
 /* ============ Landing calibration（v7.27 实测校准） ============
-   fyEdge  = 桩面左右两端（椭圆侧点）y
+   fyEdge   = 桩面左右两端（椭圆侧点）y
    fyCenter = 桩面中心偏前（中线与前沿之间）y
-   span    = 桩面在背景图内的 x 范围                        */
+   span     = 桩面在背景图内的 x 范围                        */
 const STAGE_BY_BP = {
   xs: { span: [0.10, 0.93] as [number, number], fyEdge: 0.849, fyCenter: 0.862 },
   sm: { span: [0.37, 0.95] as [number, number], fyEdge: 0.727, fyCenter: 0.745 },
@@ -287,6 +284,10 @@ export function FruitSlider() {
     shadowProbe.onload = () => { shadowProbeState = 1; tryApplyShadow(); };
     shadowProbe.onerror = () => { shadowProbeState = -1; tryApplyShadow(); };
     shadowProbe.src = "/assets/agrumea/leaf-shadow-soft.png";
+
+    /* v7.28 FIX (TS2339): 原 `if ("filter" in sg) ... else ...` 的 else 分支
+       被 TS 收窄为 never（DOM 类型里 filter 恒存在）→ 改 try/catch，
+       sg 全程保持 CanvasRenderingContext2D，imageSmoothingEnabled/drawImage 合法 */
     const makeShadowSprite = (srcCanvas: HTMLCanvasElement): string | null => {
       const w = srcCanvas.width, h = srcCanvas.height;
       const sc = document.createElement("canvas");
@@ -294,22 +295,24 @@ export function FruitSlider() {
       const sg = sc.getContext("2d");
       if (!sg) return null;
       const blurPx = Math.max(10, Math.round(w * 0.014));
-      if ("filter" in sg) {
+      try {
         sg.filter = `blur(${blurPx}px)`;
         sg.drawImage(srcCanvas, 0, 0);
         sg.filter = "none";
-      } else {
+      } catch {
+        /* 极老浏览器不支持 ctx.filter → 降采样模拟模糊 */
         const q = document.createElement("canvas");
         q.width = Math.max(2, Math.floor(w / 6));
         q.height = Math.max(2, Math.floor(h / 6));
         const qg = q.getContext("2d");
-        if (!qg) return null;
-        qg.drawImage(srcCanvas, 0, 0, q.width, q.height);
-        sg.imageSmoothingEnabled = true;
-        sg.drawImage(q, 0, 0, w, h);
+        if (qg) {
+          qg.drawImage(srcCanvas, 0, 0, q.width, q.height);
+          sg.imageSmoothingEnabled = true;
+          sg.drawImage(q, 0, 0, w, h);
+        }
       }
       sg.globalCompositeOperation = "source-in";
-      sg.fillStyle = "rgba(26,20,10,1)";
+      sg.fillStyle = "rgba(26,20,10,1)"; // 暖中性影色 → multiply 不再把桩/石染绿
       sg.fillRect(0, 0, w, h);
       return sc.toDataURL("image/png");
     };
@@ -359,7 +362,7 @@ export function FruitSlider() {
     };
     prepLightMasks();
 
-        /* ============ Leaf Frame（多候选 + 抠白底 + 手机竖版拼合） ============ */
+    /* ============ Leaf Frame（多候选 + 抠白底 + 手机竖版拼合） ============ */
     let leavesApplied = false;
     let leafBase: HTMLCanvasElement | null = null; // 抠好的横版原图
     let leafUrl = "";

@@ -1,5 +1,4 @@
 "use client";
-
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ProductCard } from "@/components/product-card";
@@ -18,7 +17,6 @@ function PantrySearchInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("q") ?? "";
-
   const [query, setQuery] = useState(urlQuery);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -126,6 +124,9 @@ function PantrySearchInner() {
                   turns: [],
                   model: "",
                   description: r.body,
+                  /* v7.28 fix (TS2741): Product 类型必填 variants → 搜索结果
+                     仅作展示卡片用，给空数组即可（购买页走 findProduct，不受影响） */
+                  variants: [],
                 }}
               />
             ))}

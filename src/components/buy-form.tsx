@@ -1,8 +1,7 @@
 "use client";
-
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { formatPrice, type Product } from "@/data/products";
+import { type Product } from "@/data/products";
 import { SHOP_URL } from "@/data/navigation";
 
 /**
@@ -12,6 +11,11 @@ import { SHOP_URL } from "@/data/navigation";
  * the external Agrumea shop with the product pre-filled in the URL hash so
  * staff/customers can see exactly what was chosen.
  */
+
+/* v7.28 fix (TS2614): `formatPrice` is NOT exported from @/data/products,
+   so define it locally: integer cents → "€x.xx". */
+const formatPrice = (cents: number): string => `€${(cents / 100).toFixed(2)}`;
+
 export function BuyForm({ product }: { product: Product }) {
   const router = useRouter();
   const [variantIdx, setVariantIdx] = useState(0);
@@ -21,7 +25,6 @@ export function BuyForm({ product }: { product: Product }) {
   const variant = product.variants[variantIdx];
   const options = variant.options ?? [];
   const selectedOption = options.length > 0 ? optionIdx[variantIdx] ?? 0 : -1;
-
   const unitPrice = variant.priceCents;
   const total = useMemo(() => unitPrice * qty, [unitPrice, qty]);
 
@@ -143,6 +146,7 @@ export function BuyForm({ product }: { product: Product }) {
           Back to details
         </button>
       </div>
+
       <p className="buy-form__note">
         Checkout continues on agrumeafarm.it — your selection ({
           options.length > 0 ? options[selectedOption].label : variant.label
