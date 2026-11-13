@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -7,12 +8,14 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { products, type Product } from "@/data/products";
+import { ForestAmbience } from "@/components/forest-ambience";
 
 /* ============================================================
-FruitSlider v7.28 — Vercel TS fix
-· FIX (TS2339 @308/309): makeShadowSprite 的 `if ("filter" in sg)` else 分支
-  被 TS 收窄为 never → 改 try/catch 兜底，sg 保持 CanvasRenderingContext2D
-· KEEP: v7.27 桩面校准 / 手机竖版叶框拼合 / 拖拽搓转 / 阵风 / 光影 / Draco
+   FruitSlider v7.33 — Natural Forest Light & Corner-Lock Leaves
+   · 四角锁定叶框：桌面端任意比例下四簇叶完整贴角
+   · 自然光影互动：低强度环境光 + 平滑鼠标跟随 + 水果悬停轻微提亮
+   · 桩面校准：手机 v7.28 原值保留；桌面新底图实测校准
+   · v7.33：集成 ForestAmbience 背景虚化光斑 / 鼠标视差 / 滚动视差
 ============================================================ */
 
 const PX2W = 1 / 100;
@@ -26,61 +29,32 @@ const REV_MS = 4200;
 const SPIN_DPS = 360 / (REV_MS / 1000);
 const TOUCH_SPIN_DEG = 0.45;
 const SPIN_SPRING_STIFF = 60, REST_SNAP_K = 6;
-
-/* Leaf sway amplitude / Shadow interaction gain / Light direction */
-const LEAF_AMP = 0.5;
-const SHADOW_AMP = 1.25;
+const LEAF_AMP = 0.72;
+const SHADOW_AMP = 1.65;
 const LIGHT_DIR = { x: -1.6, y: 2.2 };
-
-const SHADOW_OP = { base: 0.14, amp: 0.05, wind: 0.05 };
-const DAPPLE_OP = { base: 0.35, amp: 0.08, wind: 0.08 };
-const LIGHT_OP = { base: 0.65, amp: 0.12, wind: 0.10 };
-const RAYS_OP = { base: 0.40, amp: 0.18, wind: 0.12 };
-const GUST_MIN_MS = 6000, GUST_RAND_MS = 4000;
-
+const SHADOW_OP = { base: 0.17, amp: 0.045, wind: 0.045 };
+const DAPPLE_OP = { base: 0.22, amp: 0.055, wind: 0.045 };
+const LIGHT_OP = { base: 0.24, amp: 0.055, wind: 0.035 };
+const RAYS_OP = { base: 0.075, amp: 0.025, wind: 0.02 };
+const GUST_MIN_MS = 5200, GUST_RAND_MS = 3600;
 const LIGHT_STREAKS_SRC = "/assets/agrumea/forest-light-streaks.jpg";
-const LEAF_CANDIDATES = [
-  "/assets/agrumea/leaf-frame.png",
-  "/assets/agrumea/leaf-frame1.png",
-];
-const LEAF_ALPHA_SRC = "/assets/agrumea/leaf-frame-alpha.png";
+const LEAF_MOBILE_SRC = "/assets/agrumea/leaf-frame.png";
+const LEAF_DESKTOP_SRC = "/assets/agrumea/leaf-frame-desktop.png";
 
-/* ============ Responsive Trio: Always show 3 fruits ============ */
 const TRIO_BY_BP = {
-  /* 手机：0.22 / 0.50 / 0.78 三槽全在屏内且落在桩面上 */
   xs: { n: 0.28, rest: 0.22, fL: [0.02, 0.06] as [number, number], fR: [0.02, 0.06] as [number, number] },
-  /* 桌面：rest 0.50 → 三果中心对齐桩中心 x≈0.67 */
   sm: { n: 0.17, rest: 0.50, fL: [0.40, 0.45] as [number, number], fR: [0.06, 0.12] as [number, number] },
   md: { n: 0.17, rest: 0.50, fL: [0.40, 0.45] as [number, number], fR: [0.06, 0.12] as [number, number] },
 };
-
-/* Background priority: Full Scene Plate -> Clean Plate -> Streaks */
 const BG_BY_BP = {
   xs: { src: "/assets/agrumea/hero-forest-mobile.jpg", posY: 0.68 },
   sm: { src: "/assets/agrumea/hero-forest-desktop.jpg", posY: 0.62 },
   md: { src: "/assets/agrumea/hero-forest-desktop.jpg", posY: 0.62 },
 };
-const BG_CLEAN_BY_BP: Record<"xs" | "sm" | "md", string> = {
-  xs: "/assets/agrumea/hero-forest-clean-mobile.jpg",
-  sm: "/assets/agrumea/hero-forest-clean-desktop.jpg",
-  md: "/assets/agrumea/hero-forest-clean-desktop.jpg",
-};
-
-/* Stage candidates (Green screen stump) - only used if Clean Plate is active */
-const STAGE_CANDIDATES: Record<"xs" | "sm" | "md", string[]> = {
-  xs: ["/assets/agrumea/hero-stage-mobile.png", "/assets/agrumea/hero-stage-mobile.jpg"],
-  sm: ["/assets/agrumea/hero-stage-desktop.png", "/assets/agrumea/hero-stage-desktop.jpg"],
-  md: ["/assets/agrumea/hero-stage-desktop.png", "/assets/agrumea/hero-stage-desktop.jpg"],
-};
-
-/* ============ Landing calibration（v7.27 实测校准） ============
-   fyEdge   = 桩面左右两端（椭圆侧点）y
-   fyCenter = 桩面中心偏前（中线与前沿之间）y
-   span     = 桩面在背景图内的 x 范围                        */
 const STAGE_BY_BP = {
   xs: { span: [0.10, 0.93] as [number, number], fyEdge: 0.849, fyCenter: 0.862 },
-  sm: { span: [0.37, 0.95] as [number, number], fyEdge: 0.727, fyCenter: 0.745 },
-  md: { span: [0.37, 0.95] as [number, number], fyEdge: 0.727, fyCenter: 0.745 },
+  sm: { span: [0.33, 0.99] as [number, number], fyEdge: 0.705, fyCenter: 0.722 },
+  md: { span: [0.33, 0.99] as [number, number], fyEdge: 0.705, fyCenter: 0.722 },
 };
 
 let bpKey: "xs" | "sm" | "md" = "md";
@@ -146,11 +120,13 @@ const LOAD_CONCURRENCY = 2;
 const PROBE_TIMEOUT_MS = 3000;
 const DRACO_LOCAL = "/draco/gltf/";
 const DRACO_GSTATIC = "https://www.gstatic.com/draco/versioned/decoders/1.5.7/";
+
 const withTimeout = <T,>(p: Promise<T>, ms: number): Promise<T> =>
   Promise.race([
     p,
     new Promise<never>((_, rej) => setTimeout(() => rej(new Error("load timeout")), ms)),
   ]);
+
 const diagnose = async (url: string): Promise<string> => {
   try {
     const r = await fetch(url, { method: "HEAD" });
@@ -171,7 +147,6 @@ export function FruitSlider() {
   const lightRef = useRef<HTMLDivElement>(null);
   const dappleRef = useRef<HTMLDivElement>(null);
   const shadowRef = useRef<HTMLImageElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
   const raysRef = useRef<HTMLDivElement>(null);
   const poolRef = useRef<HTMLDivElement>(null);
   const [hovered, setHovered] = useState<Product | null>(null);
@@ -181,35 +156,19 @@ export function FruitSlider() {
     const root = rootRef.current, canvas = canvasRef.current;
     if (!root || !canvas) return;
 
-    /* ============ Curtain Probe: Full Plate -> Clean -> Streaks ============ */
     const bgResolved: Record<"xs" | "sm" | "md", string> = {
       xs: BG_BY_BP.xs.src, sm: BG_BY_BP.sm.src, md: BG_BY_BP.md.src,
     };
-    const curtainIsClean: Record<string, boolean> = { xs: false, sm: false, md: false };
-    const curtainProbe = (k: "xs" | "sm" | "md", urls: string[]) => {
-      const [u, ...rest] = urls;
-      if (!u) return;
-      fetch(u, { method: "HEAD" })
-        .then((r) => {
-          if (r.ok) {
-            bgResolved[k] = u;
-            curtainIsClean[k] = (u === BG_CLEAN_BY_BP[k]);
-            console.info(`[fruit-slider] curtain: ${u}`);
-          } else {
-            curtainProbe(k, rest);
-          }
-        })
-        .catch(() => curtainProbe(k, rest));
-    };
-    (Object.keys(BG_BY_BP) as ("xs" | "sm" | "md")[]).forEach((k) => {
-      curtainProbe(k, [BG_BY_BP[k].src, BG_CLEAN_BY_BP[k], LIGHT_STREAKS_SRC]);
-    });
 
-    /* ============ Green Screen Stage Keying ============ */
-    const stageData: Record<string, string> = {};
-    const keyGreen = (img: HTMLImageElement): string | null => {
+    let leavesApplied = false;
+    let leafBaseMobile: HTMLCanvasElement | null = null;
+    let leafBaseDesktop: HTMLCanvasElement | null = null;
+    let leafAppliedBp = "";
+    let leafAppliedAspect = 0;
+
+    const keyLeaf = (img: HTMLImageElement, needKey: boolean): HTMLCanvasElement | null => {
       try {
-        const maxW = 2000;
+        const maxW = 1600;
         const s = Math.min(1, maxW / img.naturalWidth);
         const w = Math.round(img.naturalWidth * s);
         const h = Math.round(img.naturalHeight * s);
@@ -218,76 +177,79 @@ export function FruitSlider() {
         const g = c.getContext("2d", { willReadFrequently: true });
         if (!g) return null;
         g.drawImage(img, 0, 0, w, h);
-        const d = g.getImageData(0, 0, w, h);
-        const px = d.data;
-        for (let i = 0; i < px.length; i += 4) {
-          const r = px[i], gg = px[i + 1], b = px[i + 2];
-          const dist = Math.sqrt(r * r + (255 - gg) * (255 - gg) + b * b) / 441.7;
-          const t = clamp01((dist - 0.10) / 0.12);
-          const a = t * t * (3 - 2 * t);
-          px[i + 3] = Math.round(a * 255);
-          if (px[i + 3] > 0 && px[i + 3] < 250) {
-            px[i + 1] = Math.min(gg, Math.max(r, b) + 30);
+        if (needKey) {
+          const d = g.getImageData(0, 0, w, h);
+          const px = d.data;
+          for (let i = 0; i < px.length; i += 4) {
+            const r = px[i], gg = px[i + 1], b = px[i + 2];
+            const lum = (r + gg + b) / 3;
+            const sat = Math.max(r, gg, b) - Math.min(r, gg, b);
+            if (lum > 225 && sat < 28) px[i + 3] = 0;
+            else if (lum > 200 && sat < 40) px[i + 3] = Math.round(px[i + 3] * (1 - ((lum - 200) / 25) * 0.8));
           }
+          g.putImageData(d, 0, 0);
         }
-        g.putImageData(d, 0, 0);
-        return c.toDataURL("image/png");
+        return c;
       } catch {
         return null;
       }
     };
-    const applyStage = (k: "xs" | "sm" | "md") => {
-      const el = stageRef.current;
-      if (!el || !stageData[k] || !curtainIsClean[k]) return;
-      if (k === bpKey) {
-        el.style.backgroundImage = `url("${stageData[k]}")`;
-        el.style.display = "block";
-        root.classList.add("fs-stage-ok");
-      }
-    };
-    const loadStage = (k: "xs" | "sm" | "md", urls: string[]) => {
-      const [u, ...rest] = urls;
-      if (!u) { console.warn(`[fruit-slider] stage plate missing for ${k}`); return; }
-      const img = new Image();
-      img.onload = () => {
-        const data = keyGreen(img);
-        if (data) {
-          stageData[k] = data;
-          console.info(`[fruit-slider] stage keyed: ${u}`);
-          applyStage(k);
-          if (k === bpKey) { curStructSrc = ""; measure(); }
-        } else loadStage(k, rest);
-      };
-      img.onerror = () => loadStage(k, rest);
-      img.src = u;
-    };
-    (Object.keys(STAGE_CANDIDATES) as ("xs" | "sm" | "md")[]).forEach((k) => loadStage(k, STAGE_CANDIDATES[k]));
 
-    /* ============ Leaf Shadow Sprite ============ */
-    let shadowProbeState = 0;
+    let vw = 0, rootH = 0;
+
+    const buildLeafSprite = (): string | null => {
+      const base = bpKey === "xs" ? leafBaseMobile : (leafBaseDesktop ?? leafBaseMobile);
+      if (!base) return null;
+      const c = base;
+      const W = 1200;
+      const aspect = rootH > 0 && vw > 0 ? rootH / vw : 16 / 9;
+      const H = Math.round(W * aspect);
+      const out = document.createElement("canvas");
+      out.width = W; out.height = H;
+      const g = out.getContext("2d");
+      if (!g) return c.toDataURL("image/png");
+      if (bpKey === "xs") {
+        const halfH = Math.round(c.height / 2);
+        const bandH = Math.round((W * halfH) / c.width);
+        g.drawImage(c, 0, 0, c.width, halfH, 0, 0, W, bandH);
+        g.drawImage(c, 0, c.height - halfH, c.width, halfH, 0, H - bandH, W, bandH);
+      } else {
+        const hw = c.width / 2, hh = c.height / 2;
+        const HW = W / 2, HH = H / 2;
+        g.drawImage(c, 0, 0, hw, hh, 0, 0, HW, HH);
+        g.drawImage(c, hw, 0, hw, hh, HW, 0, HW, HH);
+        g.drawImage(c, 0, hh, hw, hh, 0, HH, HW, HH);
+        g.drawImage(c, hw, hh, hw, hh, HW, HH, HW, HH);
+      }
+      return out.toDataURL("image/png");
+    };
+
+    const applyLeaves = (fromUrl: string) => {
+      const el = leavesRef.current;
+      if (!el) return;
+      const data = buildLeafSprite();
+      if (!data) return;
+      leavesApplied = true;
+      leafAppliedBp = bpKey;
+      leafAppliedAspect = vw > 0 ? rootH / vw : 0;
+      el.src = data;
+      el.style.display = "block";
+      root.classList.add("fs-leaves-ok");
+      console.info(`[fruit-slider] leaves ok: ${fromUrl} (bp=${bpKey})`);
+    };
+
+    const refreshLeaves = () => {
+      const base = bpKey === "xs" ? leafBaseMobile : leafBaseDesktop;
+      if (!base) return;
+      const aspect = vw > 0 ? rootH / vw : 0;
+      const needBp = leafAppliedBp !== bpKey;
+      const needAspect = Math.abs(aspect - leafAppliedAspect) > 0.06;
+      if (needBp || needAspect) applyLeaves(bpKey === "xs" ? LEAF_MOBILE_SRC : LEAF_DESKTOP_SRC);
+    };
+
     let generatedShadow: string | null = null;
     let shadowApplied = false;
-    const applyShadow = (src: string) => {
-      const el = shadowRef.current;
-      if (!el || shadowApplied) return;
-      shadowApplied = true;
-      el.src = src;
-      el.style.display = "block";
-      root.classList.add("fs-shadow-ok");
-      console.info("[fruit-slider] leaf shadow applied");
-    };
-    const tryApplyShadow = () => {
-      if (shadowProbeState === 1) applyShadow("/assets/agrumea/leaf-shadow-soft.png");
-      else if (shadowProbeState === -1 && generatedShadow) applyShadow(generatedShadow);
-    };
-    const shadowProbe = new Image();
-    shadowProbe.onload = () => { shadowProbeState = 1; tryApplyShadow(); };
-    shadowProbe.onerror = () => { shadowProbeState = -1; tryApplyShadow(); };
-    shadowProbe.src = "/assets/agrumea/leaf-shadow-soft.png";
 
-    /* v7.28 FIX (TS2339): 原 `if ("filter" in sg) ... else ...` 的 else 分支
-       被 TS 收窄为 never（DOM 类型里 filter 恒存在）→ 改 try/catch，
-       sg 全程保持 CanvasRenderingContext2D，imageSmoothingEnabled/drawImage 合法 */
     const makeShadowSprite = (srcCanvas: HTMLCanvasElement): string | null => {
       const w = srcCanvas.width, h = srcCanvas.height;
       const sc = document.createElement("canvas");
@@ -300,7 +262,6 @@ export function FruitSlider() {
         sg.drawImage(srcCanvas, 0, 0);
         sg.filter = "none";
       } catch {
-        /* 极老浏览器不支持 ctx.filter → 降采样模拟模糊 */
         const q = document.createElement("canvas");
         q.width = Math.max(2, Math.floor(w / 6));
         q.height = Math.max(2, Math.floor(h / 6));
@@ -312,12 +273,38 @@ export function FruitSlider() {
         }
       }
       sg.globalCompositeOperation = "source-in";
-      sg.fillStyle = "rgba(26,20,10,1)"; // 暖中性影色 → multiply 不再把桩/石染绿
+      sg.fillStyle = "rgba(26,20,10,1)";
       sg.fillRect(0, 0, w, h);
       return sc.toDataURL("image/png");
     };
 
-    /* ============ Light Masks (CSS Gradients driven by JS) ============ */
+    const applyShadow = (src: string) => {
+      const el = shadowRef.current;
+      if (!el || shadowApplied) return;
+      shadowApplied = true;
+      el.src = src;
+      el.style.display = "block";
+      root.classList.add("fs-shadow-ok");
+    };
+    const tryApplyShadow = () => { if (generatedShadow) applyShadow(generatedShadow); };
+
+    const loadLeaf = (url: string, needKey: boolean, target: "xs" | "desktop") => {
+      const img = new Image();
+      img.onload = () => {
+        const c = keyLeaf(img, needKey);
+        if (!c) return;
+        if (target === "xs") leafBaseMobile = c; else leafBaseDesktop = c;
+        if (!generatedShadow) { generatedShadow = makeShadowSprite(c); tryApplyShadow(); }
+        const activeTarget = bpKey === "xs" ? "xs" : "desktop";
+        if (!leavesApplied && activeTarget === target) applyLeaves(url);
+        else refreshLeaves();
+      };
+      img.onerror = () => console.warn(`[fruit-slider] leaf missing: ${url}`);
+      img.src = url;
+    };
+    loadLeaf(LEAF_MOBILE_SRC, true, "xs");
+    loadLeaf(LEAF_DESKTOP_SRC, true, "desktop");
+
     let lightReady = false, dappleReady = false;
     let lightFromPng = false;
     const dapplePngProbe = new Image();
@@ -331,6 +318,7 @@ export function FruitSlider() {
       root.classList.add("fs-light-screen");
     };
     dapplePngProbe.src = "/assets/agrumea/leaf-light-dapple.png";
+
     const prepLightMasks = () => {
       const probe = new Image();
       probe.onload = () => {
@@ -350,7 +338,6 @@ export function FruitSlider() {
           lightReady = true;
           root.classList.add("fs-light-screen");
         }
-        console.info("[fruit-slider] light+shadow driven by forest-light-streaks.jpg");
       };
       probe.onerror = () => {
         const dpEl = dappleRef.current;
@@ -362,98 +349,9 @@ export function FruitSlider() {
     };
     prepLightMasks();
 
-    /* ============ Leaf Frame（多候选 + 抠白底 + 手机竖版拼合） ============ */
-    let leavesApplied = false;
-    let leafBase: HTMLCanvasElement | null = null; // 抠好的横版原图
-    let leafUrl = "";
-    let leafAppliedBp = "";
-    let leafAppliedAspect = 0;
-    const buildLeafSprite = (): string | null => {
-      if (!leafBase) return null;
-      const c = leafBase;
-      if (bpKey !== "xs") return c.toDataURL("image/png");
-      // 手机：源图上半（左上/右上枝）贴顶、下半（左下/右下枝）贴底，
-      // 画布按当前屏幕比例生成 → cover 不再裁掉四角
-      const W = 900;
-      const aspect = rootH > 0 && vw > 0 ? rootH / vw : 16 / 9;
-      const H = Math.round(W * aspect);
-      const halfH = Math.round(c.height / 2);
-      const bandH = Math.round((W * halfH) / c.width);
-      const out = document.createElement("canvas");
-      out.width = W; out.height = H;
-      const g = out.getContext("2d");
-      if (!g) return c.toDataURL("image/png");
-      g.drawImage(c, 0, 0, c.width, halfH, 0, 0, W, bandH);
-      g.drawImage(c, 0, c.height - halfH, c.width, halfH, 0, H - bandH, W, bandH);
-      return out.toDataURL("image/png");
-    };
-    const applyLeaves = (fromUrl: string) => {
-      const el = leavesRef.current;
-      if (!el || !leafBase) return;
-      const data = buildLeafSprite();
-      if (!data) return;
-      leavesApplied = true;
-      leafAppliedBp = bpKey;
-      leafAppliedAspect = vw > 0 ? rootH / vw : 0;
-      el.src = data;
-      el.style.display = "block";
-      root.classList.add("fs-leaves-ok");
-      console.info(`[fruit-slider] leaves ok: ${fromUrl} (bp=${bpKey})`);
-    };
-    const refreshLeaves = () => {
-      if (!leafBase) return;
-      const aspect = vw > 0 ? rootH / vw : 0;
-      const needBp = leafAppliedBp !== bpKey;
-      const needAspect = bpKey === "xs" && Math.abs(aspect - leafAppliedAspect) > 0.08;
-      if (needBp || needAspect) applyLeaves(leafUrl);
-    };
-    const keyAndApply = (img: HTMLImageElement, needKey: boolean, fromUrl: string) => {
-      try {
-        const maxW = 1600;
-        const s = Math.min(1, maxW / img.naturalWidth);
-        const w = Math.round(img.naturalWidth * s);
-        const h = Math.round(img.naturalHeight * s);
-        const c = document.createElement("canvas");
-        c.width = w; c.height = h;
-        const g = c.getContext("2d", { willReadFrequently: true });
-        if (!g) return;
-        g.drawImage(img, 0, 0, w, h);
-        if (needKey) {
-          const d = g.getImageData(0, 0, w, h);
-          const px = d.data;
-          for (let i = 0; i < px.length; i += 4) {
-            const r = px[i], gg = px[i + 1], b = px[i + 2];
-            const lum = (r + gg + b) / 3;
-            const sat = Math.max(r, gg, b) - Math.min(r, gg, b);
-            if (lum > 225 && sat < 28) px[i + 3] = 0;
-            else if (lum > 200 && sat < 40) px[i + 3] = Math.round(px[i + 3] * (1 - ((lum - 200) / 25) * 0.8));
-          }
-          g.putImageData(d, 0, 0);
-        }
-        leafBase = c;
-        leafUrl = fromUrl;
-        if (!leavesApplied) applyLeaves(fromUrl);
-        generatedShadow = makeShadowSprite(c);
-        tryApplyShadow();
-      } catch (e) {
-        console.warn(`[fruit-slider] leaf keying failed: ${fromUrl}`, e);
-      }
-    };
-    const prepLeaves = (urls: string[]) => {
-      const [u, ...rest] = urls;
-      if (!u) {
-        console.warn("[fruit-slider] leaf-frame: ALL candidates 404");
-        return;
-      }
-      const img = new Image();
-      img.onload = () => keyAndApply(img, u !== LEAF_ALPHA_SRC, u);
-      img.onerror = () => prepLeaves(rest);
-      img.src = u;
-    };
-    prepLeaves([LEAF_ALPHA_SRC, ...LEAF_CANDIDATES]);
-
     const wrap = root.querySelector<HTMLElement>("[data-fruit-slider-wrap]");
     if (!wrap) return;
+
     const fine = window.matchMedia("(hover: hover) and (pointer: fine)");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const D = products.length;
@@ -470,10 +368,12 @@ export function FruitSlider() {
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
+
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 400);
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
     const hemi = new THREE.HemisphereLight(0xf2ffd9, 0x24361d, 0.7);
     const key = new THREE.DirectionalLight(0xfff3dd, 2.4); key.position.set(2.5, 4, 3);
     const fill = new THREE.DirectionalLight(0xd8ffd0, 0.5); fill.position.set(-3, 1.5, 2);
@@ -489,6 +389,7 @@ export function FruitSlider() {
       hovered: boolean;
       hBase: number; pose: number;
     };
+
     const fruits: Fruit[] = products.map((p) => {
       const group = new THREE.Group();
       const pivot = new THREE.Group();
@@ -518,9 +419,9 @@ export function FruitSlider() {
       slotOf = slots;
     };
 
-    let vw = 0, rootH = 0, N = 0, F = 0, j = 0, u = 0, h0 = 0;
+    let N = 0, F = 0, j = 0, u = 0, h0 = 0;
     let imgW = 0, imgH = 0, dispW = 0, dispH = 0, offX = 0, offY = 0;
-    let curBgSrc = "", curStructSrc = "", curPosY = 0.62;
+    let curBgSrc = "", curPosY = 0.62;
     let interacted = false;
     let target = 0, H = 0, vel = 0, lastInteract = -1;
 
@@ -555,22 +456,8 @@ export function FruitSlider() {
       if (curtain !== curBgSrc) {
         curBgSrc = curtain;
         root.style.setProperty("--fs-bg-src", `url("${curtain}")`);
-      }
-      const stageOn = !!stageData[bpKey] && !!curtainIsClean[bpKey];
-      const struct = stageOn ? STAGE_CANDIDATES[bpKey][0] : curtain;
-      if (struct !== curStructSrc) {
-        curStructSrc = struct;
-        curPosY = stageOn ? 1.0 : BG_BY_BP[bpKey].posY;
-        bgImg.src = struct;
-      }
-      const stEl = stageRef.current;
-      if (stEl) {
-        if (stageOn) {
-          stEl.style.backgroundImage = `url("${stageData[bpKey]}")`;
-          stEl.style.display = "block";
-        } else {
-          stEl.style.display = "none";
-        }
+        curPosY = BG_BY_BP[bpKey].posY;
+        bgImg.src = curtain;
       }
       N = vw * bp.n;
       u = N * 0.42;
@@ -592,6 +479,7 @@ export function FruitSlider() {
       if (dragging) return;
       target = h0 + Math.round((target - h0) / N) * N;
     };
+
     const worldX = (xpx: number) => (xpx - vw / 2) * PX2W;
     const worldY = (ypx: number) => (rootH / 2 - ypx) * PX2W;
     const posOf = (i: number, r: number) => {
@@ -600,7 +488,6 @@ export function FruitSlider() {
       return c - j;
     };
 
-    /* ============ Loading Pipeline ============ */
     let destroyed = false, loadedCount = 0;
     const dracoSets: DRACOLoader[] = [];
     let LOADERS: [string, GLTFLoader][] = [];
@@ -614,12 +501,9 @@ export function FruitSlider() {
       return l;
     };
     const headOk = async (url: string, ms = PROBE_TIMEOUT_MS): Promise<boolean> => {
-      try {
-        return (await withTimeout(fetch(url, { method: "HEAD" }), ms)).ok;
-      } catch {
-        return false;
-      }
+      try { return (await withTimeout(fetch(url, { method: "HEAD" }), ms)).ok; } catch { return false; }
     };
+
     const attachModel = (idx: number, gltf: Awaited<ReturnType<GLTFLoader["loadAsync"]>>) => {
       const obj = gltf.scene;
       const box = new THREE.Box3().setFromObject(obj);
@@ -642,16 +526,14 @@ export function FruitSlider() {
       fruits[idx].revealAt = performance.now() + ENTER_DELAY;
       recomputeSlots();
       loadedCount++;
-      console.info(`[fruit-slider] loaded ${products[idx].slug} (${loadedCount}/${D})`);
       if (loadedCount >= Math.min(FIRST_SCREEN_COUNT, D)) root.classList.add("is-webgl");
     };
+
     const tryLoad = async (idx: number) => {
       const candidates = [products[idx].model, ...(ALT_MODELS[products[idx].slug] ?? [])];
       for (const c of candidates) {
         for (const [, l] of LOADERS) {
-          try {
-            return await withTimeout(l.loadAsync(c), LOAD_CANDIDATE_TIMEOUT_MS);
-          } catch { /* retry next */ }
+          try { return await withTimeout(l.loadAsync(c), LOAD_CANDIDATE_TIMEOUT_MS); } catch { }
         }
       }
       return null;
@@ -659,24 +541,17 @@ export function FruitSlider() {
     const loadModel = async (idx: number): Promise<boolean> => {
       if (destroyed || fruits[idx].loaded) return fruits[idx].loaded;
       const gltf = await tryLoad(idx);
-      if (!gltf || destroyed) {
-        const probe = await diagnose(products[idx].model);
-        console.warn(`[fruit-slider] ${products[idx].slug}: all candidates failed | probe ${products[idx].model}: ${probe}`);
-        return false;
-      }
+      if (!gltf || destroyed) return false;
       if (fruits[idx].loaded) return true;
       attachModel(idx, gltf);
       return true;
     };
     const bootLoad = async () => {
-      const localOk =
-        (await headOk(`${DRACO_LOCAL}draco_wasm_wrapper.js`)) &&
-        (await headOk(`${DRACO_LOCAL}draco_decoder.wasm`));
+      const localOk = (await headOk(`${DRACO_LOCAL}draco_wasm_wrapper.js`)) && (await headOk(`${DRACO_LOCAL}draco_decoder.wasm`));
       const gOk = await headOk(`${DRACO_GSTATIC}draco_wasm_wrapper.js`);
       if (localOk) LOADERS.push(["local", makeLoader(DRACO_LOCAL, true)]);
       if (gOk) LOADERS.push(["gstatic", makeLoader(DRACO_GSTATIC, false)]);
       if (!LOADERS.length) LOADERS.push(["local-noprobe", makeLoader(DRACO_LOCAL, false)]);
-      console.info(`[fruit-slider] draco loaders: ${LOADERS.map((l) => l[0]).join(" + ")}`);
       const queue = products.map((_, i) => i);
       const failed: number[] = [];
       await Promise.all(Array.from({ length: LOAD_CONCURRENCY }, async () => {
@@ -686,14 +561,10 @@ export function FruitSlider() {
           if (!ok) failed.push(idx);
         }
       }));
-      for (const idx of failed) {
-        if (destroyed) break;
-        await loadModel(idx);
-      }
+      for (const idx of failed) { if (destroyed) break; await loadModel(idx); }
     };
     void bootLoad();
 
-    /* ============ Interaction ============ */
     let dragging = false, dragId = -1, movedFar = false;
     let dragX = 0, downX = 0, dragVel = 0, dragTime = 0;
     let spinIdx = -1, spinLastX = 0, spinVel = 0;
@@ -702,9 +573,11 @@ export function FruitSlider() {
     let lastHoverSlug = "";
     let wheelTimer: ReturnType<typeof setTimeout> | undefined;
     const wind = newSpring();
-    let nextGust = performance.now() + 4000;
+    let nextGust = performance.now() + 1800;
     let lastPX = 0, lastPY = 0, lastPT = 0;
     let shLagX = 0, shLagY = 0, shLagR = 0;
+    let lightLagX = 0, lightLagY = 0;
+    let hoverRect = { x: 0, y: 0, w: 0, h: 0, on: false };
 
     const hitTest = (cx: number, cy: number) => {
       const r = root.getBoundingClientRect();
@@ -716,13 +589,12 @@ export function FruitSlider() {
       }
       return -1;
     };
+
     const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      interacted = true;
+      e.preventDefault(); interacted = true;
       const d = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
       target -= d * WHEEL_SPEED;
-      clearTimeout(wheelTimer);
-      wheelTimer = setTimeout(snapToTrio, 160);
+      clearTimeout(wheelTimer); wheelTimer = setTimeout(snapToTrio, 160);
     };
     const onDown = (e: PointerEvent) => {
       movedFar = false; dragId = e.pointerId;
@@ -742,19 +614,15 @@ export function FruitSlider() {
         const dx = e.clientX - spinLastX; spinLastX = e.clientX;
         if (Math.abs(e.clientX - downX) > 6) movedFar = true;
         const a = fruits[spinIdx];
-        a.spin += dx * TOUCH_SPIN_DEG;
-        a.speed.value = 0; a.speed.velocity = 0;
+        a.spin += dx * TOUCH_SPIN_DEG; a.speed.value = 0; a.speed.velocity = 0;
         spinVel = spinVel * 0.7 + (dx / Math.max(1, now - dragTime)) * 0.3 * TOUCH_SPIN_DEG * 1000;
-        dragTime = now; lastInteract = now;
-        return;
+        dragTime = now; lastInteract = now; return;
       }
       if (!dragging) return;
       if (!movedFar) {
         if (Math.abs(e.clientX - downX) <= 6) return;
         try { wrap.setPointerCapture(e.pointerId); } catch { return; }
-        movedFar = true; interacted = true;
-        dragX = e.clientX; dragTime = now;
-        return;
+        movedFar = true; interacted = true; dragX = e.clientX; dragTime = now; return;
       }
       const dx = e.clientX - dragX;
       dragVel = dragVel * 0.72 + (dx / Math.max(1, now - dragTime)) * 0.28;
@@ -763,8 +631,7 @@ export function FruitSlider() {
     };
     const onUp = (e: PointerEvent) => {
       if (dragId === -1 || e.pointerId !== dragId) return;
-      const clickedIdx = downHitIdx;
-      const didMoveFar = movedFar;
+      const clickedIdx = downHitIdx; const didMoveFar = movedFar;
       if (spinIdx >= 0) {
         const a = fruits[spinIdx];
         a.speed.value = clamp(spinVel, -240, 240); a.speed.velocity = 0;
@@ -773,7 +640,7 @@ export function FruitSlider() {
         return;
       }
       if (didMoveFar) {
-        try { wrap.releasePointerCapture(e.pointerId); } catch { /* noop */ }
+        try { wrap.releasePointerCapture(e.pointerId); } catch { }
         target += clamp(dragVel, -FLING_CLAMP, FLING_CLAMP) * DRAG_SPEED * FLING_SPEED;
         snapToTrio();
       } else if (clickedIdx >= 0 && fine.matches) {
@@ -782,6 +649,7 @@ export function FruitSlider() {
       dragVel = 0; dragging = false; dragId = -1; movedFar = false;
     };
     const onClick = (e: MouseEvent) => { e.preventDefault(); e.stopPropagation(); };
+
     const onRootMove = (e: PointerEvent) => {
       if (e.pointerType === "touch") return;
       pointerInside = true;
@@ -791,7 +659,7 @@ export function FruitSlider() {
       if (lastPT > 0) {
         const pdt = Math.max(8, nowMs - lastPT);
         const sp = Math.hypot(e.clientX - lastPX, e.clientY - lastPY) / pdt;
-        wind.velocity += Math.min(3, sp * 0.05);
+        wind.velocity += Math.min(4, sp * 0.16);
       }
       lastPX = e.clientX; lastPY = e.clientY; lastPT = nowMs;
     };
@@ -800,6 +668,7 @@ export function FruitSlider() {
       fruits.forEach((f) => (f.hovered = false));
       if (lastHoverSlug !== "") { lastHoverSlug = ""; setHovered(null); }
     };
+
     wrap.addEventListener("wheel", onWheel, { passive: false });
     wrap.addEventListener("pointerdown", onDown);
     wrap.addEventListener("pointermove", onMove);
@@ -813,10 +682,12 @@ export function FruitSlider() {
     let raf = 0, prev = performance.now();
     let smx = 0, smy = 0;
     let poolX = -1, poolY = -1;
+
     const frame = (now: number) => {
       if (destroyed) return;
       const dt = Math.min(1 / 30, Math.max(0, (now - prev) / 1000));
       prev = now;
+
       const oldH = H;
       H += (target - H) * (1 - Math.exp(-(dragging ? 11 : 2.3) * dt));
       if (Math.abs(target - H) < 0.05) H = target;
@@ -824,6 +695,7 @@ export function FruitSlider() {
       const speedAbs = Math.abs(vel);
       if (dragging || spinIdx >= 0 || speedAbs > 6) lastInteract = now;
       const idleZone = !dragging && spinIdx < 0 && speedAbs <= N * 1.4;
+
       hoverIdx = -1;
       if (pointerInside && !dragging && fine.matches) {
         for (let i = 0; i < D; i++) {
@@ -838,93 +710,108 @@ export function FruitSlider() {
         lastHoverSlug = slug;
         setHovered(hoverIdx >= 0 ? products[hoverIdx] : null);
       }
-      // Mouse Parallax
+
       const nx = pointerInside ? (mouseX / Math.max(1, vw) - 0.5) * 2 : 0;
       const ny = pointerInside ? (mouseY / Math.max(1, rootH) - 0.5) * 2 : 0;
-      smx += (nx - smx) * (1 - Math.exp(-3 * dt));
-      smy += (ny - smy) * (1 - Math.exp(-3 * dt));
-      stepSpring(wind, 0, 30, dt);
-      // Auto Gust
+      smx += (nx - smx) * (1 - Math.exp(-2.4 * dt));
+      smy += (ny - smy) * (1 - Math.exp(-2.4 * dt));
+      stepSpring(wind, 0, 13, dt);
       if (now >= nextGust) {
-        wind.velocity += 0.55;
+        wind.velocity += 1.35 + Math.random() * 0.45;
         nextGust = now + GUST_MIN_MS + Math.random() * GUST_RAND_MS;
       }
-      const windC = clamp(wind.value, 0, 1.5);
-      const gustLeaf = 1 + windC * 0.5;
-      const gustShadow = 1 + windC * 1.0;
+      const windC = clamp(wind.value, 0, 1.8);
+      const t = now / 1000;
+
       if (!reduced) {
-        const t = now / 1000;
-        // Unified Sway Signal
-        const bw0 = Math.sin(t * 0.85) * 0.55 + smx * 1.4;
-        const bx0 = Math.sin(t * 0.85 + 0.6) * 0.35 + smx * 1.1;
-        const by0 = Math.cos(t * 0.7) * 0.22 + smy * 0.7;
-        // Leaves (Half Amplitude)
-        const sw = bw0 * LEAF_AMP * gustLeaf;
-        const tx = bx0 * LEAF_AMP * gustLeaf;
-        const ty = by0 * LEAF_AMP * gustLeaf;
+        const breezeX = Math.sin(t * 0.42) * 0.62 + Math.sin(t * 0.19 + 1.7) * 0.34;
+        const breezeY = Math.cos(t * 0.31 + 0.8) * 0.30 + Math.sin(t * 0.16) * 0.18;
+        const gust = 1 + windC * 0.95;
+        const pointerInfluenceX = smx * 0.72;
+        const pointerInfluenceY = smy * 0.42;
+        const bw0 = breezeX + pointerInfluenceX;
+        const bx0 = Math.sin(t * 0.36 + 0.6) * 0.52 + breezeX * 0.48 + smx * 0.52;
+        const by0 = breezeY + pointerInfluenceY;
+
         const leavesEl = leavesRef.current;
         if (leavesEl) {
-          leavesEl.style.transform = `translate3d(${tx.toFixed(2)}%, ${ty.toFixed(2)}%, 0) rotate(${sw.toFixed(2)}deg)`;
+          const leafRotate = (Math.sin(t * 0.38) * 0.34 + Math.sin(t * 0.17 + 1.2) * 0.18 + smx * 0.22) * gust;
+          const leafX = (Math.sin(t * 0.29 + 0.4) * 0.34 + smx * 0.22) * LEAF_AMP * gust;
+          const leafY = (Math.cos(t * 0.25) * 0.22 + smy * 0.14) * LEAF_AMP * gust;
+          const leafScale = 1.006 + windC * 0.002;
+          leavesEl.style.transform = `translate3d(${leafX.toFixed(3)}%, ${leafY.toFixed(3)}%, 0) rotate(${leafRotate.toFixed(3)}deg) scale(${leafScale.toFixed(4)})`;
         }
-        // Shadow Lag (Full Amplitude)
-        shLagX += (bx0 * SHADOW_AMP - shLagX) * (1 - Math.exp(-2.0 * dt));
-        shLagY += (by0 * SHADOW_AMP - shLagY) * (1 - Math.exp(-2.0 * dt));
-        shLagR += (bw0 * SHADOW_AMP - shLagR) * (1 - Math.exp(-1.6 * dt));
-        // Layer: Dynamic Leaf Shadow
+
+        const shadowTargetX = bx0 * SHADOW_AMP * gust;
+        const shadowTargetY = by0 * SHADOW_AMP * gust;
+        const shadowTargetR = bw0 * 0.62 * gust;
+        const lag = 1 - Math.exp(-1.35 * dt);
+        shLagX += (shadowTargetX - shLagX) * lag;
+        shLagY += (shadowTargetY - shLagY) * lag;
+        shLagR += (shadowTargetR - shLagR) * (1 - Math.exp(-1.05 * dt));
+
         const shEl = shadowRef.current;
         if (shEl && shadowApplied) {
-          const stx = shLagX * 1.9 * gustShadow + LIGHT_DIR.x;
-          const sty = shLagY * 1.9 * gustShadow + LIGHT_DIR.y;
-          const srt = shLagR * 1.35 * gustShadow;
-          const sop = SHADOW_OP.base + SHADOW_OP.amp * Math.sin(t * 0.85 + 1.9) + SHADOW_OP.wind * windC;
-          shEl.style.transform = `translate3d(${stx.toFixed(2)}%, ${sty.toFixed(2)}%, 0) rotate(${srt.toFixed(2)}deg) scale(1.08)`;
-          shEl.style.opacity = sop.toFixed(3);
+          const stx = shLagX * 3.0 + LIGHT_DIR.x;
+          const sty = shLagY * 2.7 + LIGHT_DIR.y;
+          const srt = shLagR * 0.72;
+          const sop = SHADOW_OP.base + SHADOW_OP.amp * (0.5 + 0.5 * Math.sin(t * 0.47 + 1.9)) + SHADOW_OP.wind * Math.min(1, windC);
+          shEl.style.transform = `translate3d(${stx.toFixed(2)}%, ${sty.toFixed(2)}%, 0) rotate(${srt.toFixed(2)}deg) scale(1.045)`;
+          shEl.style.opacity = clamp(sop, 0.08, 0.28).toFixed(3);
         }
-        // Layer: Ambient Dapple
+
         const dpEl = dappleRef.current;
         if (dpEl && dappleReady) {
-          const dxp = shLagX * 2.2 * gustShadow + LIGHT_DIR.x * 0.35 + smx * 2.6;
-          const dyp = shLagY * 2.2 * gustShadow + LIGHT_DIR.y * 0.35 + smy * 1.9;
-          const dsk = smx * 3.0;
-          const dsc = 1.06 + Math.abs(smx) * 0.05 + Math.abs(smy) * 0.03;
-          dpEl.style.transform =
-            `translate3d(${dxp.toFixed(2)}%, ${dyp.toFixed(2)}%, 0) rotate(${(shLagR * 1.1 * gustShadow).toFixed(2)}deg) skewX(${dsk.toFixed(2)}deg) scale(${dsc.toFixed(3)})`;
-          dpEl.style.opacity = (DAPPLE_OP.base + DAPPLE_OP.amp * Math.sin(t * 0.85 + 2.4) + DAPPLE_OP.wind * windC).toFixed(3);
+          const dxp = shLagX * 4.1 + breezeX * 1.45 + smx * 2.0;
+          const dyp = shLagY * 3.5 + breezeY * 1.4 + smy * 1.5;
+          const dsk = breezeX * 1.05 + smx * 1.25;
+          const dsc = 1.035 + Math.abs(breezeX) * 0.018 + windC * 0.008;
+          const dOpacity = DAPPLE_OP.base + DAPPLE_OP.amp * (0.5 + 0.5 * Math.sin(t * 0.52 + 2.4)) + DAPPLE_OP.wind * Math.min(1, windC);
+          dpEl.style.transform = `translate3d(${dxp.toFixed(2)}%, ${dyp.toFixed(2)}%, 0) rotate(${(shLagR * 0.42).toFixed(2)}deg) skewX(${dsk.toFixed(2)}deg) scale(${dsc.toFixed(3)})`;
+          dpEl.style.opacity = clamp(dOpacity, 0.10, 0.34).toFixed(3);
         }
-        // Layer: Warm Light
+
         const lightEl = lightRef.current;
         if (lightEl && lightReady) {
           const scrollK = clamp01(window.scrollY / Math.max(1, rootH));
-          const lx = Math.sin(t * 0.30 + 1.1) * 0.9 + smx * 2.2 - shLagX * 1.2;
-          const ly = Math.cos(t * 0.24) * 0.6 + smy * 1.5 - shLagY * 1.2 + scrollK * 2.0;
-          lightEl.style.transform =
-            `translate3d(${lx.toFixed(2)}%, ${ly.toFixed(2)}%, 0) rotate(${(-shLagR * 0.7 + smx * 2.0).toFixed(2)}deg) scale(1.08)`;
-          lightEl.style.opacity = (LIGHT_OP.base + LIGHT_OP.amp * Math.sin(t * 0.85 + 0.9) + LIGHT_OP.wind * windC).toFixed(3);
+          const lx = breezeX * 1.35 + lightLagX * 1.3 + smx * 0.7;
+          const ly = breezeY * 1.15 + lightLagY * 1.0 + scrollK * 1.2;
+          lightLagX += (lx - lightLagX) * (1 - Math.exp(-1.7 * dt));
+          lightLagY += (ly - lightLagY) * (1 - Math.exp(-1.7 * dt));
+          lightEl.style.transform = `translate3d(${lightLagX.toFixed(2)}%, ${lightLagY.toFixed(2)}%, 0) rotate(${(breezeX * 0.22).toFixed(2)}deg) scale(1.045)`;
+          const lightOpacity = LIGHT_OP.base + LIGHT_OP.amp * (0.5 + 0.5 * Math.sin(t * 0.31 + 0.9)) + LIGHT_OP.wind * Math.min(1, windC);
+          lightEl.style.opacity = clamp(lightOpacity, 0.16, 0.34).toFixed(3);
         }
-        // Layer: God Rays
+
         const raysEl = raysRef.current;
         if (raysEl) {
-          const rx = Math.sin(t * 0.12) * 1.6 + smx * 1.6;
-          const ry = Math.cos(t * 0.09) * 0.8 + smy * 0.9;
-          const rr = Math.sin(t * 0.07) * 0.8;
-          raysEl.style.transform = `translate3d(${rx.toFixed(2)}%, ${ry.toFixed(2)}%, 0) rotate(${rr.toFixed(2)}deg)`;
-          raysEl.style.opacity = (RAYS_OP.base + RAYS_OP.amp * Math.sin(t * 0.23 + 0.7) + RAYS_OP.wind * windC).toFixed(3);
+          const rx = breezeX * 1.1 + smx * 0.8;
+          const ry = breezeY * 0.9 + smy * 0.55;
+          raysEl.style.transform = `translate3d(${rx.toFixed(2)}%, ${ry.toFixed(2)}%, 0) rotate(${(breezeX * 0.16).toFixed(2)}deg)`;
+          raysEl.style.opacity = (RAYS_OP.base + RAYS_OP.amp * (0.5 + 0.5 * Math.sin(t * 0.22 + 0.7))).toFixed(3);
         }
-        // 鼠标跟随光池
+
         const poolEl = poolRef.current;
         if (poolEl) {
-          if (poolX < 0) { poolX = vw * 0.62; poolY = rootH * 0.38; }
-          poolX += (mouseX - poolX) * (1 - Math.exp(-4 * dt));
-          poolY += (mouseY - poolY) * (1 - Math.exp(-4 * dt));
-          poolEl.style.transform =
-            `translate3d(${poolX.toFixed(1)}px, ${poolY.toFixed(1)}px, 0) translate(-50%, -50%)`;
-          poolEl.style.opacity = (0.30 + 0.10 * Math.sin(t * 0.9) + 0.10 * windC).toFixed(3);
+          const targetX = hoverRect.on
+            ? hoverRect.x + hoverRect.w / 2
+            : pointerInside ? mouseX : vw * (0.68 + breezeX * 0.025);
+          const targetY = hoverRect.on
+            ? hoverRect.y + hoverRect.h * 0.78
+            : pointerInside ? mouseY : rootH * (0.58 + breezeY * 0.025);
+          if (poolX < 0) { poolX = targetX; poolY = targetY; }
+          const follow = 1 - Math.exp(-2.2 * dt);
+          poolX += (targetX - poolX) * follow;
+          poolY += (targetY - poolY) * follow;
+          const baseOpacity = hoverRect.on ? 0.105 : pointerInside ? 0.065 : 0.018;
+          const breathing = 0.009 * Math.sin(t * 0.42);
+          poolEl.style.transform = `translate3d(${poolX.toFixed(1)}px, ${poolY.toFixed(1)}px, 0) translate(-50%, -50%)`;
+          poolEl.style.opacity = clamp(baseOpacity + breathing + windC * 0.008, 0, 0.13).toFixed(3);
         }
       } else {
-        // Reduced Motion Static State
         const shEl = shadowRef.current;
         if (shEl && shadowApplied) {
-          shEl.style.transform = `translate3d(${LIGHT_DIR.x}%, ${LIGHT_DIR.y}%, 0) scale(1.08)`;
+          shEl.style.transform = `translate3d(${LIGHT_DIR.x}%, ${LIGHT_DIR.y}%, 0) scale(1.045)`;
           shEl.style.opacity = String(SHADOW_OP.base);
         }
         const dpEl = dappleRef.current;
@@ -932,20 +819,21 @@ export function FruitSlider() {
         const lightEl = lightRef.current;
         if (lightEl && lightReady) { lightEl.style.opacity = String(LIGHT_OP.base); }
         const raysEl = raysRef.current;
-        if (raysEl) { raysEl.style.opacity = "0.3"; }
+        if (raysEl) { raysEl.style.opacity = String(RAYS_OP.base); }
         const poolEl = poolRef.current;
         if (poolEl) poolEl.style.opacity = "0";
       }
 
       const hBase = rootH * (bpKey === "xs" ? 0.17 : bpKey === "sm" ? 0.28 : 0.30);
       let hx = 0, hy = 0, hw = 0, hh = 0, hasHover = false;
+      hoverRect.on = false;
+
       fruits.forEach((a, i) => {
         a.hovered = hoverIdx === i;
         const dwellOk = idleZone && a.hovered;
         if (!dwellOk) a.dwellStart = -1;
         else if (a.dwellStart < 0) a.dwellStart = now;
-        const wantSpin = fine.matches && a.loaded && a.hovered && spinIdx < 0 && a.dwellStart >= 0 &&
-          (a.enterTime > lastInteract || now - a.dwellStart >= 260);
+        const wantSpin = fine.matches && a.loaded && a.hovered && spinIdx < 0 && a.dwellStart >= 0 && (a.enterTime > lastInteract || now - a.dwellStart >= 260);
         if (spinIdx !== i) stepSpring(a.speed, wantSpin ? SPIN_DPS : 0, SPIN_SPRING_STIFF, dt);
         a.spin += a.speed.value * dt;
         if (Math.abs(a.speed.value) < 1.5 && Math.abs(a.speed.velocity) < 2 && spinIdx !== i) {
@@ -964,6 +852,7 @@ export function FruitSlider() {
         const onStage = fade > 0.3 && a.loaded;
         stepSpring(a.lift, onStage ? 0 : LIFT_PX, 100, dt);
         if (i === hoverIdx && onStage) {
+          hoverRect = { x: a.rect.x, y: a.rect.y, w: a.rect.w, h: a.rect.h, on: true };
           hx = a.rect.x; hy = a.rect.y; hw = a.rect.w; hh = a.rect.h; hasHover = true;
         }
         const g = a.group;
@@ -980,34 +869,32 @@ export function FruitSlider() {
         const shOp = fade * ap * land;
         const softEl = softRefs.current[i];
         const coreEl = coreRefs.current[i];
+        const sdx = SH_SOFT.dx - lightLagX * 0.10 - shLagX * 0.04;
+        const sdy = SH_SOFT.dy + lightLagY * 0.05;
+        const ssx = SH_SOFT.sw * (1 + lightLagX * 0.05);
         if (softEl) {
           softEl.style.opacity = (SH_SOFT.op * shOp).toFixed(3);
-          softEl.style.transform =
-            `translate3d(${(gx + w * SH_SOFT.dx).toFixed(1)}px, ${(gy + w * SH_SOFT.dy).toFixed(1)}px, 0) ` +
-            `scale(${((w * SH_SOFT.sw) / 200 * pop).toFixed(3)}, ${((w * SH_SOFT.sh) / 60 * pop).toFixed(3)})`;
+          softEl.style.transform = `translate3d(${(gx + w * sdx).toFixed(1)}px, ${(gy + w * sdy).toFixed(1)}px, 0) scale(${((w * ssx) / 200 * pop).toFixed(3)}, ${((w * SH_SOFT.sh) / 60 * pop).toFixed(3)})`;
         }
         if (coreEl) {
           coreEl.style.opacity = (SH_CORE.op * shOp).toFixed(3);
-          coreEl.style.transform =
-            `translate3d(${(gx + w * SH_CORE.dx).toFixed(1)}px, ${(gy + w * SH_CORE.dy).toFixed(1)}px, 0) ` +
-            `scale(${((w * SH_CORE.sw) / 120 * pop).toFixed(3)}, ${((w * SH_CORE.sh) / 30 * pop).toFixed(3)})`;
+          coreEl.style.transform = `translate3d(${(gx + w * (SH_CORE.dx - lightLagX * 0.06)).toFixed(1)}px, ${(gy + w * (SH_CORE.dy + lightLagY * 0.03)).toFixed(1)}px, 0) scale(${((w * SH_CORE.sw) / 120 * pop).toFixed(3)}, ${((w * SH_CORE.sh) / 30 * pop).toFixed(3)})`;
         }
       });
-      // Discover Label
+
       const dk = discoverRef.current;
       if (dk) {
         if (hasHover && fine.matches) {
           const flip = (hx + hw) > vw * 0.66;
           const ax = flip ? hx - 10 : hx + hw + 10;
           const ay = hy + hh * 0.42;
-          dk.style.transform =
-            `translate3d(${ax.toFixed(1)}px, ${ay.toFixed(1)}px, 0) translateY(-50%)` +
-            (flip ? " translateX(-100%)" : "");
+          dk.style.transform = `translate3d(${ax.toFixed(1)}px, ${ay.toFixed(1)}px, 0) translateY(-50%)` + (flip ? " translateX(-100%)" : "");
           dk.style.opacity = "1";
         } else {
           dk.style.opacity = "0";
         }
       }
+
       renderer.render(scene, camera);
       raf = requestAnimationFrame(frame);
     };
@@ -1058,24 +945,14 @@ export function FruitSlider() {
 
   return (
     <section className="fruit-slider fruit-slider--forest" ref={rootRef} data-fruit-slider data-anim="hero">
-      {/* Layer 0: Forest Curtain (Full Scene Plate) */}
       <div className="fs-bg" aria-hidden="true" />
-      {/* Layer 1: Green Screen Stage (Only if Clean Plate active) */}
-      <div className="fs-stage" ref={stageRef} aria-hidden="true" />
-      {/* Layer 2: Dynamic Leaf Shadow */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className="fs-leafshadow" ref={shadowRef} alt="" aria-hidden="true" />
-      {/* Layer 3: Ambient Dapple */}
       <div className="fs-dapple" ref={dappleRef} aria-hidden="true" />
-      {/* Layer 4: Warm Light */}
       <div className="fs-light" ref={lightRef} aria-hidden="true" />
-      {/* Layer 5: God Rays */}
       <div className="fs-rays" ref={raysRef} aria-hidden="true" />
-      {/* 层 5.5：鼠标跟随光池 */}
       <div className="fs-pool" ref={poolRef} aria-hidden="true" />
-      {/* Layer 6: Vignette */}
+      <ForestAmbience />
       <div className="fs-vignette" aria-hidden="true" />
-      {/* Contact Shadows */}
       <div className="fruit-slider__shadows" aria-hidden="true">
         {products.map((p, i) => (
           <div key={`shadow-soft-${p.slug}`} className="fruit-shadow" ref={(el) => { softRefs.current[i] = el; }} />
@@ -1084,12 +961,8 @@ export function FruitSlider() {
           <div key={`shadow-core-${p.slug}`} className="fruit-shadow fruit-shadow--core" ref={(el) => { coreRefs.current[i] = el; }} />
         ))}
       </div>
-      {/* WebGL Fruits */}
       <canvas ref={canvasRef} className="fruit-slider__canvas" aria-hidden="true" />
-      {/* Layer 7: Leaf Frame (Foreground) */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className="fs-leaves" ref={leavesRef} src="/assets/agrumea/leaf-frame.png" alt="" aria-hidden="true" />
-      {/* Copy Block */}
       <div className="fs-copy">
         <p className="fs-eyebrow">Natural · Fresh · Healthy</p>
         <h1 className="fs-title">
@@ -1101,9 +974,7 @@ export function FruitSlider() {
           Explore More <span aria-hidden="true">→</span>
         </Link>
       </div>
-      {/* Hover Discover Capsule */}
       <div className="fruit-discover" ref={discoverRef} aria-hidden="true">Discover the product</div>
-      {/* Hover Info Card */}
       <div className={`fruit-info-card${hovered ? " is-visible" : ""}`} aria-live="polite">
         {hovered && (
           <>
@@ -1113,13 +984,11 @@ export function FruitSlider() {
           </>
         )}
       </div>
-      {/* Scroll Indicator */}
       <a className="fs-scroll" href="#site-main" aria-label="Scroll to discover">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M12 5v14M6 13l6 6 6-6" />
         </svg>
       </a>
-      {/* Interaction Layer */}
       <div className="fruit-slider__wrapper" data-fruit-slider-wrap />
     </section>
   );
